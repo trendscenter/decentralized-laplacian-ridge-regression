@@ -23,7 +23,8 @@ module.exports = {
     preRun: [
       (done) => {
         // remove randomness from simulation
-        const remote = require('../src/remote');
+        // late require _required_ as different process will be runnign this script
+        const remote = require('../src/remote'); // eslint-disable-line
         remote.defaultW = [9, 2];
         done();
       },

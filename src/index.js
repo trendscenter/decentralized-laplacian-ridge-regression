@@ -23,7 +23,7 @@ module.exports = {
       localRunner.run(opts, (err, data) => {
         if (err) { return cb(err); }
         data.step = data.kickoff ? 0 : (data.step || 0) + 1;
-        console.log(data);
+        if (data) console.log(data);
         cb(null, data);
       });
     },
@@ -32,18 +32,9 @@ module.exports = {
   remote: {
     type: 'function',
     fn(opts, cb) {
-      // stub some default values
-      opts.previousData = Object.assign({ step: 1, userStep: {} }, opts.previousData);
-
-      // apply user current step(s) to our RemoteComputationResult
-      opts.userResults.forEach(usrRslt => {
-        opts.previousData.userStep[usrRslt.username] = usrRslt.data.step;
-      });
-
       remoteRunner.run(opts, (err, data) => {
         if (err) { return cb(err); }
-        // show output for demo
-        console.log(data);
+        if (data) console.log(data);
         cb(null, data);
       });
     },

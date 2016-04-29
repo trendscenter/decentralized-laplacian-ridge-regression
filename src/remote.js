@@ -21,7 +21,12 @@ module.exports = {
       prevObjective: null,
       currObjective: null,
       eta: null,
+      step: 1,
+      userStep: {},
     }, opts.previousData || {});
+
+    // apply user current step(s) to our RemoteComputationResult
+    userResults.forEach((usrRslt) => (r.userStep[usrRslt.username] = usrRslt.data.step));
 
     // initialize group data
     if (userResults[0].data.kickoff) {
@@ -40,7 +45,6 @@ module.exports = {
     const allUsersPresent = opts.userResults.length === opts.usernames.length;
     const shouldBumpStep = allUsersMatch && allUsersPresent;
     if (!allUsersPresent || !allUsersMatch) {
-      console.log('allUsersMatch', allUsersMatch);
       return cb();
     }
     if (r.step === 100) {
