@@ -41,6 +41,6 @@ module.exports = {
     // begin processing
     localData.lGrad = regression.gradient(localW, parsed.X, parsed.y, localLambda);
     localData.lObj = regression.objective(localW, parsed.X, parsed.y, localLambda);
-    cb(null, localData);
+    return cb(null, localData);
   },
 };

@@ -24,7 +24,7 @@ module.exports = {
       (done) => {
         // remove randomness from simulation
         const remote = require('../src/remote');
-        remote.defaultW = [0.5, 0.5];
+        remote.defaultW = [9, 2];
         done();
       },
     ],

@@ -15,9 +15,10 @@ module.exports = {
       const serverKickoff = get(opts, 'remoteResult.data.kickoff');
       const groupStep = get(opts, 'remoteResult.data.step') || 1;
       const userStep = opts.step = get(opts, 'previousData.step') || 0;
-      if (userStep === groupStep) { return cb(); }
-      if (serverKickoff) {
+      if (userStep === groupStep) {
         return cb();
+      } else if (!userStep && serverKickoff) {
+        return cb(null, { step: 0 });
       }
       localRunner.run(opts, (err, data) => {
         if (err) { return cb(err); }
@@ -32,34 +33,15 @@ module.exports = {
     type: 'function',
     fn(opts, cb) {
       // stub some default values
-      const _default = { step: 1, userStep: {} };
-
-      // construct our current group data from default and past values
-      const result = Object.assign({}, _default, opts.previousData);
+      opts.previousData = Object.assign({ step: 1, userStep: {} }, opts.previousData);
 
       // apply user current step(s) to our RemoteComputationResult
       opts.userResults.forEach(usrRslt => {
-        result.userStep[usrRslt.username] = usrRslt.data.step;
+        opts.previousData.userStep[usrRslt.username] = usrRslt.data.step;
       });
-
-      // determine if computation should bump computation step
-      const userStepValues = values(result.userStep);
-      const allUsersMatch = userStepValues.every(uStep => uStep === result.step);
-      const allUsersPresent = userStepValues.length === opts.usernames.length;
-      const shouldBumpStep = allUsersMatch && allUsersPresent;
-      if (!allUsersPresent) { return cb(null, { kickoff: true }); }
-      else {
-        delete opts.previousData.kickoff;
-      }
 
       remoteRunner.run(opts, (err, data) => {
         if (err) { return cb(err); }
-        data = Object.assign(result, data);
-        if (data.step === 100 && allUsersMatch) {
-          data.complete = true;
-        } else if (shouldBumpStep) {
-          data.step += 1;
-        }
         // show output for demo
         console.log(data);
         cb(null, data);
