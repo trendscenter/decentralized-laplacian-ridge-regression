@@ -25,7 +25,8 @@ module.exports = {
         // remove randomness from simulation
         // late require _required_ as different process will be runnign this script
         const remote = require('../src/remote'); // eslint-disable-line
-        remote.defaultW = [9, 2];
+          remote.defaultW = [0.5,0.5];
+        //remote.defaultW = n.random([2]);          
         done();
       },
     ],

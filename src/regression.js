@@ -2,7 +2,7 @@
 const n = require('numeric');
 
 module.exports = {
-  defaultLambda: 0.7,
+  defaultLambda: 0.0,
 
     /**
      * Compute regression error for a set of samples (objective)

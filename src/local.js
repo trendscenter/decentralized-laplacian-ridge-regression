@@ -21,11 +21,12 @@ module.exports = {
     // @TODO userData will likely be files.  need to parse user input first
     const parsed = userData;
 
-    parsed.X = this.addBias(parsed.X);
+      parsed.X = this.addBias(parsed.X);
+      //console.log('parsed: ', parsed);
     if (!remoteData) {
       localData.kickoff = true;
       localData.lambda = localLambda = userData.lamba || 0.0;
-      localData.eta = userData.eta || 0.1;
+      localData.eta = userData.eta || 1e-1;
       localData.numFeatures = numeric.dim(parsed.X)[1];
       return cb(null, localData);
     }
