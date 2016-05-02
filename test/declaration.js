@@ -1,5 +1,5 @@
-const path = require('path');
-const n = require('numeric');
+const path = require('path')
+const n = require('numeric')
 module.exports = {
   computationPath: path.resolve(__dirname, '../src/index.js'),
   users: [
@@ -25,11 +25,11 @@ module.exports = {
         // remove randomness from simulation
         // late require _required_ as different process will be runnign this script
         const remote = require('../src/remote'); // eslint-disable-line
-          remote.defaultW = [0.5,0.5];
-        //remote.defaultW = n.random([2]);          
-        done();
+        remote.defaultW = [0.5, 0.5]
+        // remote.defaultW = n.random([2]);          
+        done()
       },
     ],
   },
   verbose: true,
-};
+}
