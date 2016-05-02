@@ -1,15 +1,15 @@
-'use strict';
-var utils = require('./utils');
-var jStat = require('jstat').jStat;
+'use strict'
+var utils = require('./utils')
+var jStat = require('jstat').jStat
 
 /**
  * Convert Laplace CDF scale to exponential CDF rate (lambda)
  * @param  {number} scale the Laplace CDF scale
  * @return {number}       the exponential CDF rate (lamdba)
  */
-function scaleToRate(scale) {
-  scale = scale || 1;
-  return 1 / scale;
+function scaleToRate (scale) {
+  scale = scale || 1
+  return 1 / scale
 }
 
 /**
@@ -17,18 +17,18 @@ function scaleToRate(scale) {
  * @param  {number} probability the Laplace probability (between 0, 1)
  * @return {number}             the Exponential probability (between 0, 1)
  */
-function convertProbability(probability) {
-  var errorMsg;
+function convertProbability (probability) {
+  var errorMsg
   if (probability <= 0 || probability >= 1) {
-      errorMsg = [
-          'probability must be in range [0,1]: `',
-          probability,
-          '` given'
-        ].join('');
-      throw new Error(errorMsg);
-    }
+    errorMsg = [
+      'probability must be in range [0,1]: `',
+      probability,
+      '` given'
+    ].join('')
+    throw new Error(errorMsg)
+  }
 
-  return Math.abs(1 - (2 * probability));
+  return Math.abs(1 - (2 * probability))
 }
 
 /**
@@ -38,9 +38,9 @@ function convertProbability(probability) {
  * @param  {number} mean        the mean of the Laplace CDF
  * @return {number}             The Laplace CDF value
  */
-function convertDistrubution(expX, probability, mean) {
-  mean = mean || 0;
-  return expX * utils.sign(probability - 0.5) + mean;
+function convertDistrubution (expX, probability, mean) {
+  mean = mean || 0
+  return expX * utils.sign(probability - 0.5) + mean
 }
 
 /**
@@ -50,11 +50,11 @@ function convertDistrubution(expX, probability, mean) {
  * @param  {number} mean of the CDN (default to 0)
  * @return {number}   The inverse transform of the CDN at location
  */
-function inverseCdf(probability, scale, mean) {
-  var rate = scaleToRate(scale);
-  var expProbability = convertProbability(probability);
-  var expX = jStat.exponential.inv(expProbability, rate);
-  return convertDistrubution(expX, probability, mean);
+function inverseCdf (probability, scale, mean) {
+  var rate = scaleToRate(scale)
+  var expProbability = convertProbability(probability)
+  var expX = jStat.exponential.inv(expProbability, rate)
+  return convertDistrubution(expX, probability, mean)
 }
 
 /**
@@ -63,9 +63,9 @@ function inverseCdf(probability, scale, mean) {
  * @param  {number} mean  the mean of the CDN (defaults to 0)
  * @return {number}       random sample from Laplace CDN
  */
-function sampleInverseCdf(scale, mean) {
-  var probability = Math.random();
-  return inverseCdf(probability, scale, mean);
+function sampleInverseCdf (scale, mean) {
+  var probability = Math.random()
+  return inverseCdf(probability, scale, mean)
 }
 
 /**
@@ -73,12 +73,12 @@ function sampleInverseCdf(scale, mean) {
  * @param  {number} scale the scale of the CDN (defaults to 1)
  * @return {number}       the noise
  */
-function noise(scale) {
-  return sampleInverseCdf(scale);
+function noise (scale) {
+  return sampleInverseCdf(scale)
 }
 
 module.exports = {
   inverse: inverseCdf,
   sampleInverse: sampleInverseCdf,
   noise: noise
-};
+}

@@ -1,10 +1,9 @@
-'use strict';
+'use strict'
 
-const n = require('numeric');
-const values = require('lodash/values');
+const n = require('numeric')
+const values = require('lodash/values')
 
 module.exports = {
-
   defaultW: null, // may be overwritten for unit testing
 
   /**
@@ -14,7 +13,7 @@ module.exports = {
    * @returns {undefined}
    */
   run(opts, cb) {
-    const userResults = opts.userResults;
+    const userResults = opts.userResults
     const r = Object.assign({
       currW: null,
       prevW: null,
@@ -23,56 +22,62 @@ module.exports = {
       eta: null,
       step: 1,
       userStep: {},
-    }, opts.previousData || {});
+    }, opts.previousData || {})
 
     // apply user current step(s) to our RemoteComputationResult
-    userResults.forEach((usrRslt) => (r.userStep[usrRslt.username] = usrRslt.data.step));
+    userResults.forEach((usrRslt) => (r.userStep[usrRslt.username] = usrRslt.data.step))
 
     // initialize group data
     if (userResults[0].data.kickoff) {
-      const kickoff = userResults[0].data;
-      r.currW = r.prevW = this.defaultW || n.random([kickoff.numFeatures]);
-      r.prevObjective = 1e15;
-      r.prevGradient = n.rep([kickoff.numFeatures], 0);
-      r.eta = userResults[0].data.eta;
-      r.lambda = userResults[0].data.lambda;
-      return cb(null, r);
+      const kickoff = userResults[0].data
+      r.currW = r.prevW = this.defaultW || n.random([kickoff.numFeatures])
+      r.prevObjective = 1e15
+      r.Gradient = n.rep([kickoff.numFeatures], 0)
+      r.eta = userResults[0].data.eta
+      r.lambda = userResults[0].data.lambda
+      r.Eg2 = n.rep([kickoff.numFeatures], 0)
+      r.EdW = n.rep([kickoff.numFeatures], 0)
+      r.rho = 0.99 // watch out for this and the eps
+      r.eps = 1e-2
+      r.deltaW = 0
+      return cb(null, r)
     }
 
     // wait for all users ready
-    const userStepValues = values(r.userStep);
-    const allUsersMatch = userStepValues.every(uStep => uStep === userStepValues[0]);
-    const allUsersPresent = opts.userResults.length === opts.usernames.length;
-    const shouldBumpStep = allUsersMatch && allUsersPresent;
+    const userStepValues = values(r.userStep)
+    const allUsersMatch = userStepValues.every(uStep => uStep === userStepValues[0])
+    const allUsersPresent = opts.userResults.length === opts.usernames.length
+    const shouldBumpStep = allUsersMatch && allUsersPresent
+
     if (!allUsersPresent || !allUsersMatch) {
-      return cb();
+      return cb()
     }
-    if (r.step === 100) {
-      r.complete = true;
-      return cb(null, r);
+    if (r.step === 400) {
+      r.complete = true
+      return cb(null, r)
     }
     if (shouldBumpStep) {
-      r.step += 1;
+      r.step += 1
     }
-    delete r.kickoff;
+    delete r.kickoff
 
-    r.currObjective = userResults.reduce((prev, rslt) => prev + rslt.data.lObj, 0);
+    r.currObjective = userResults.reduce((prev, rslt) => prev + rslt.data.lObj, 0)
+
+    // ADADELTA
+    r.Gradient = userResults.reduce((prev, rslt) => n.add(prev, rslt.data.lGrad), 0)
+    r.Eg2 = n.add(n.mul(r.rho, r.Eg2), n.mul(1 - r.rho, n.mul(r.Gradient, r.Gradient)))
+    r.deltaW = n.mul(-1, n.mul(n.div(n.sqrt(n.add(r.EdW, r.eps)), n.sqrt(n.add(r.Eg2, r.eps))), r.Gradient))
+    r.EdW = n.add(n.mul(r.rho, r.EdW), n.mul(1 - r.rho, n.mul(r.deltaW, r.deltaW)))
+    r.currW = n.add(r.prevW, r.deltaW)
 
     if (r.currObjective > r.prevObjective) {
-      r.eta = r.eta / 2;
-      r.currW = n.sub(r.prevW, n.mul(r.prevGradient, r.eta));
-      r.halvedEta = true;
-    } else {
-      // if (!r.halvedEta) {
-      r.prevGradient = userResults.reduce((prev, rslt) => n.add(prev, rslt.data.lGrad), 0);
-      // } else {
-      r.currW = n.sub(r.prevW, n.mul(r.prevGradient, r.eta));
-      r.halvedEta = false;
-      // }
-      r.prevObjective = r.currObjective;
-      r.prevW = r.currW;
+      r.complete = true
+      return cb(null, r)
     }
 
-    return cb(null, r);
+    r.prevObjective = r.currObjective
+    r.prevW = r.currW
+
+    return cb(null, r)
   },
-};
+}
