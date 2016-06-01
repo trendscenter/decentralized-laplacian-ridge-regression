@@ -39,7 +39,7 @@ module.exports = {
             r.Eg2 = n.rep([kickoff.numFeatures], 0);
             r.EdW = n.rep([kickoff.numFeatures], 0);
             r.rho = 0.99; // watch out for this and the eps
-            r.eps = 1e-2;
+            r.eps = 1e-4;
             r.deltaW = 0;
             return cb(null, r);
         }
@@ -49,11 +49,12 @@ module.exports = {
         const allUsersMatch = userStepValues.every(uStep => uStep === userStepValues[0]);
         const allUsersPresent = opts.userResults.length === opts.usernames.length;
         const shouldBumpStep = allUsersMatch && allUsersPresent;
-
+        const tol = 1e-3;
+        
         if (!allUsersPresent || !allUsersMatch) {
             return cb();
         }
-        if (r.step === 400) {
+        if (r.step === 1000) {
             r.complete = true;
             return cb(null, r);
         }
@@ -75,7 +76,12 @@ module.exports = {
             r.complete = true;
             return cb(null,r)
         }
-
+        // When Gradient is small - converged
+        if (n.norm2(r.Gradient) < tol) {
+            r.complete = true;
+            return cb(null,r)            
+        }
+        
         r.prevObjective = r.currObjective;
         r.prevW = r.currW;
 
