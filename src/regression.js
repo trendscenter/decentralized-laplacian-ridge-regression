@@ -1,5 +1,5 @@
-'use strict'
-const n = require('numeric')
+'use strict';
+const n = require('numeric');
 
 module.exports = {
   defaultLambda: 0.0,
@@ -17,8 +17,8 @@ module.exports = {
    * @return {number} error score
    */
   objective(w, xVals, yVals, lambda) {
-    lambda = lambda || this.defaultLambda
-    return n.sum(n.pow(n.sub(yVals, n.dot(xVals, w)), 2)) + (lambda * n.dot(w, w) / 2)
+    lambda = lambda || this.defaultLambda;
+    return n.sum(n.pow(n.sub(yVals, n.dot(xVals, w)), 2)) + (lambda * n.dot(w, w) / 2);
   },
 
   /**
@@ -34,14 +34,14 @@ module.exports = {
    * @return {array}  gradient values for each mVal
    */
   gradient(w, X, y, lambda) {
-    lambda = lambda || this.defaultLambda
+    lambda = lambda || this.defaultLambda;
     return n.add(
       n.mul(
         -2,
         n.dot(n.transpose(X), n.sub(y, n.dot(X, w)))
       ),
       n.mul(lambda, w)
-    )
+    );
   },
 
   /**
@@ -55,7 +55,7 @@ module.exports = {
    * @return {array}  w in same order as initialMVals
    */
   oneShot(initialMVals, xVals, yVals) {
-    return n.uncmin((w) => this.objective(w, xVals, yVals), initialMVals).solution
+    return n.uncmin((w) => this.objective(w, xVals, yVals), initialMVals).solution;
   },
 
   /**
@@ -67,7 +67,7 @@ module.exports = {
    * @return {array}                  the new w (betas)
    */
   recalculateMVals(learningRate, w, gradients) {
-    return n.sub(w, n.dot(learningRate, gradients))
+    return n.sub(w, n.dot(learningRate, gradients));
   },
 
   /**
@@ -78,7 +78,7 @@ module.exports = {
    * @return {number}             result (y value)
    */
   applyModel(w, xVals) {
-    return n.dot(xVals, w)
+    return n.dot(xVals, w);
   },
 
-}
+};

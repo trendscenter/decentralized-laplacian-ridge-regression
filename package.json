@@ -9,7 +9,12 @@
     "preversion": "git checkout master && git pull && npm ls",
     "publish-patch": "npm run preversion && npm version patch && git push origin master --tags && npm publish",
     "publish-minor": "npm run preversion && npm version minor && git push origin master --tags && npm publish",
-    "publish-major": "npm run preversion && npm version major && git push origin master --tags && npm publish"
+    "publish-major": "npm run preversion && npm version major && git push origin master --tags && npm publish",
+    "lint": "eslint src/ test/",
+    "lintfix": "eslint --fix src/ test/",
+    "docs": "mkdir -p docs && jsdoc -c .jsdoc.json src/",
+    "deploy-docs": "gh-pages -d docs && rm -rf docs",
+    "postpublish": "npm run docs && npm run deploy-docs"
   },
   "author": "cdaringe",
   "license": "MIT",
@@ -19,11 +24,20 @@
     "test"
   ],
   "devDependencies": {
+    "coins-validate": "^4.1.2",
+    "eslint": "^2.11.1",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.8.1",
+    "eslint-plugin-jsx-a11y": "^1.2.2",
+    "eslint-plugin-react": "^5.1.1",
+    "gh-pages": "^0.11.0",
     "jsdoc": "^3.4.0",
     "minami": "^1.1.1",
+    "nyc": "^6.4.4",
     "tape": "^4.5.1"
   },
   "dependencies": {
+    "jstat": "^1.5.2",
     "lodash": "^4.11.1",
     "numeric": "^1.2.6"
   }

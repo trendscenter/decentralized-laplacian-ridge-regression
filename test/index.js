@@ -1,1 +1,1 @@
-require('./local')
+require('./local');
