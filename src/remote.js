@@ -1,7 +1,8 @@
 'use strict';
 
 const n = require('numeric');
-const values = require('lodash/values');
+
+const CONVERGE_TOL = 1e-3;
 
 module.exports = {
   defaultW: null, // may be overwritten for unit testing
@@ -9,10 +10,9 @@ module.exports = {
   /**
    * compute server entry point
    * @param {object} opts
-   * @param {function} cb
-   * @returns {undefined}
+   * @returns {object}
    */
-  run(opts, cb) {
+  run(opts) {
     const userResults = opts.userResults;
     const r = Object.assign({
       currW: null,
@@ -23,9 +23,6 @@ module.exports = {
       step: 1,
       userStep: {},
     }, opts.previousData || {});
-
-    // apply user current step(s) to our RemoteComputationResult
-    userResults.forEach((usrRslt) => (r.userStep[usrRslt.username] = usrRslt.data.step));
 
     // initialize group data
     if (userResults[0].data.kickoff) {
@@ -40,27 +37,9 @@ module.exports = {
       r.rho = 0.99; // watch out for this and the eps
       r.eps = 1e-4;
       r.deltaW = 0;
-      return cb(null, r);
+      return r;
     }
 
-    // wait for all users ready
-    const userStepValues = values(r.userStep);
-    const allUsersMatch = userStepValues.every(uStep => uStep === userStepValues[0]);
-    const allUsersPresent = opts.userResults.length === opts.usernames.length;
-    const shouldBumpStep = allUsersMatch && allUsersPresent;
-
-    const tol = 1e-3;
-
-    if (!allUsersPresent || !allUsersMatch) {
-      return cb();
-    }
-    if (r.step === 1000) {
-      r.complete = true;
-      return cb(null, r);
-    }
-    if (shouldBumpStep) {
-      r.step += 1;
-    }
     delete r.kickoff;
 
     r.currObjective = userResults.reduce((prev, rslt) => prev + rslt.data.lObj, 0);
@@ -74,18 +53,18 @@ module.exports = {
 
     if (r.currObjective > r.prevObjective) {
       r.complete = true;
-      return cb(null, r);
+      return r;
     }
 
     // When Gradient is small - converged
-    if (n.norm2(r.Gradient) < tol) {
+    if (n.norm2(r.Gradient) < CONVERGE_TOL) {
       r.complete = true;
-      return cb(null, r);
+      return r;
     }
 
     r.prevObjective = r.currObjective;
     r.prevW = r.currW;
 
-    return cb(null, r);
+    return r;
   },
 };

@@ -3,38 +3,29 @@
 const pkg = require('../package.json');
 const localRunner = require('./local');
 const remoteRunner = require('./remote');
-const get = require('lodash/get');
 
 module.exports = {
   name: pkg.name,
   version: pkg.version,
+  plugins: ['group-step'],
   local: {
     type: 'function',
-    fn(opts, cb) {
-      const serverKickoff = get(opts, 'remoteResult.data.kickoff');
-      const groupStep = get(opts, 'remoteResult.data.step') || 1;
-      const userStep = opts.step = get(opts, 'previousData.step') || 0;
-      if (userStep === groupStep) {
-        return cb();
-      } else if (!userStep && serverKickoff) {
-        return cb(null, { step: 0 });
-      }
-      localRunner.run(opts, (err, data) => {
-        if (err) { return cb(err); }
-        data.step = data.kickoff ? 0 : (data.step || 0) + 1;
+    fn(opts) {
+      return localRunner.run(opts)
+      .then((data) => {
         if (data) console.log(data);
-        cb(null, data);
+        return data;
       });
     },
     verbose: true,
   },
   remote: {
     type: 'function',
-    fn(opts, cb) {
-      remoteRunner.run(opts, (err, data) => {
-        if (err) { return cb(err); }
+    fn(opts) {
+      remoteRunner.run(opts)
+      .then((data) => {
         if (data) console.log(data);
-        cb(null, data);
+        return data;
       });
     },
     verbose: true,

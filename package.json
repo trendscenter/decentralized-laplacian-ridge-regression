@@ -1,7 +1,7 @@
 {
-  "name": "laplacian-noise-ridge-regression",
-  "version": "1.0.0",
-  "description": "",
+  "name": "decentralized-laplacian-ridge-regression",
+  "version": "0.0.1",
+  "description": "decentralized-laplacian-ridge-regression for COINSTAC",
   "main": "src/index.js",
   "scripts": {
     "test": "node test/",
@@ -37,8 +37,13 @@
     "tape": "^4.5.1"
   },
   "dependencies": {
-    "jstat": "^1.5.2",
     "lodash": "^4.11.1",
     "numeric": "^1.2.6"
+  },
+  "repository" :
+    {
+      "type" : "git",
+      "url" : "https://github.com/MRN-Code/decentralized-laplacian-ridge-regression.git"
+    }
   }
 }

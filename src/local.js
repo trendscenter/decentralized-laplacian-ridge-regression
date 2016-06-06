@@ -12,7 +12,7 @@ module.exports = {
   },
 
   // @TODO assert proper array dims
-  run(opts, cb) {
+  run(opts) {
     const remoteData = opts.remoteResult ? opts.remoteResult.data : null;
     const localData = opts.previousData || {};
     const userData = opts.userData;
@@ -28,7 +28,7 @@ module.exports = {
       localData.lambda = localLambda = userData.lamba || 0.0;
       localData.eta = userData.eta || 1e-1;
       localData.numFeatures = numeric.dim(parsed.X)[1];
-      return cb(null, localData);
+      return localData;
     }
     const localW = remoteData.currW;
     localLambda = remoteData.lambda;
@@ -42,6 +42,6 @@ module.exports = {
     // begin processing
     localData.lGrad = regression.gradient(localW, parsed.X, parsed.y, localLambda);
     localData.lObj = regression.objective(localW, parsed.X, parsed.y, localLambda);
-    return cb(null, localData);
+    return localData;
   },
 };
