@@ -1,8 +1,8 @@
 'use strict';
 
 const pkg = require('../package.json');
-const localRunner = require('./local');
-const remoteRunner = require('./remote');
+const local = require('./local');
+const remote = require('./remote');
 
 module.exports = {
   name: pkg.name,
@@ -11,22 +11,18 @@ module.exports = {
   local: {
     type: 'function',
     fn(opts) {
-      return localRunner.run(opts)
-      .then((data) => {
-        if (data) console.log(data);
-        return data;
-      });
+      const r = local.run(opts);
+      if (r) console.log(r);
+      return r;
     },
     verbose: true,
   },
   remote: {
     type: 'function',
     fn(opts) {
-      remoteRunner.run(opts)
-      .then((data) => {
-        if (data) console.log(data);
-        return data;
-      });
+      const r = remote.run(opts);
+      if (r) console.log(r);
+      return r;
     },
     verbose: true,
   },

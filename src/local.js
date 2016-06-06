@@ -2,6 +2,7 @@
 
 const regression = require('./regression');
 const numeric = require('numeric');
+const get = require('lodash/get');
 
 module.exports = {
   addBias(A) {
@@ -13,7 +14,7 @@ module.exports = {
 
   // @TODO assert proper array dims
   run(opts) {
-    const remoteData = opts.remoteResult ? opts.remoteResult.data : null;
+    const remoteData = get(opts, 'remoteResult.data') || null;
     const localData = opts.previousData || {};
     const userData = opts.userData;
     let localLambda;
@@ -22,7 +23,6 @@ module.exports = {
     const parsed = userData;
 
     parsed.X = this.addBias(parsed.X);
-    // console.log('parsed: ', parsed)
     if (!remoteData) {
       localData.kickoff = true;
       localData.lambda = localLambda = userData.lamba || 0.0;

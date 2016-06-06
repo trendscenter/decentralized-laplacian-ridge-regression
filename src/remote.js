@@ -20,8 +20,6 @@ module.exports = {
       prevObjective: null,
       currObjective: null,
       eta: null,
-      step: 1,
-      userStep: {},
     }, opts.previousData || {});
 
     // initialize group data
@@ -52,12 +50,14 @@ module.exports = {
     r.currW = n.add(r.prevW, r.deltaW);
 
     if (r.currObjective > r.prevObjective) {
+      // console.log('CONVERGED - objective increased');
       r.complete = true;
       return r;
     }
 
     // When Gradient is small - converged
     if (n.norm2(r.Gradient) < CONVERGE_TOL) {
+      // console.log('CONVERGED - small gradient');
       r.complete = true;
       return r;
     }
