@@ -9,10 +9,9 @@ module.exports = {
   /**
    * compute server entry point
    * @param {object} opts
-   * @param {function} cb
    * @returns {undefined}
    */
-  run(opts, cb) {
+  run(opts) {
     const userResults = opts.userResults;
     const r = Object.assign({
       currW: null,
@@ -40,7 +39,7 @@ module.exports = {
       r.rho = 0.99; // watch out for this and the eps
       r.eps = 1e-4;
       r.deltaW = 0;
-      return cb(null, r);
+      return r;
     }
 
     // wait for all users ready
@@ -52,11 +51,11 @@ module.exports = {
     const tol = 1e-3;
 
     if (!allUsersPresent || !allUsersMatch) {
-      return cb();
+      return null;
     }
     if (r.step === 1000) {
       r.complete = true;
-      return cb(null, r);
+      return r;
     }
     if (shouldBumpStep) {
       r.step += 1;
@@ -74,18 +73,18 @@ module.exports = {
 
     if (r.currObjective > r.prevObjective) {
       r.complete = true;
-      return cb(null, r);
+      return r;
     }
 
     // When Gradient is small - converged
     if (n.norm2(r.Gradient) < tol) {
       r.complete = true;
-      return cb(null, r);
+      return r;
     }
 
     r.prevObjective = r.currObjective;
     r.prevW = r.currW;
 
-    return cb(null, r);
+    return r;
   },
 };
