@@ -41,8 +41,7 @@
             <pre class="prettyprint source linenums"><code>'use strict';
 
 const n = require('numeric');
-
-const CONVERGE_TOL = 1e-3;
+const values = require('lodash/values');
 
 module.exports = {
   defaultW: null, // may be overwritten for unit testing
@@ -50,9 +49,10 @@ module.exports = {
   /**
    * compute server entry point
    * @param {object} opts
-   * @returns {object}
+   * @param {function} cb
+   * @returns {undefined}
    */
-  run(opts) {
+  run(opts, cb) {
     const userResults = opts.userResults;
     const r = Object.assign({
       currW: null,
@@ -63,6 +63,9 @@ module.exports = {
       step: 1,
       userStep: {},
     }, opts.previousData || {});
+
+    // apply user current step(s) to our RemoteComputationResult
+    userResults.forEach((usrRslt) => (r.userStep[usrRslt.username] = usrRslt.data.step));
 
     // initialize group data
     if (userResults[0].data.kickoff) {
@@ -77,9 +80,27 @@ module.exports = {
       r.rho = 0.99; // watch out for this and the eps
       r.eps = 1e-4;
       r.deltaW = 0;
-      return r;
+      return cb(null, r);
     }
 
+    // wait for all users ready
+    const userStepValues = values(r.userStep);
+    const allUsersMatch = userStepValues.every(uStep => uStep === userStepValues[0]);
+    const allUsersPresent = opts.userResults.length === opts.usernames.length;
+    const shouldBumpStep = allUsersMatch &amp;&amp; allUsersPresent;
+
+    const tol = 1e-3;
+
+    if (!allUsersPresent || !allUsersMatch) {
+      return cb();
+    }
+    if (r.step === 1000) {
+      r.complete = true;
+      return cb(null, r);
+    }
+    if (shouldBumpStep) {
+      r.step += 1;
+    }
     delete r.kickoff;
 
     r.currObjective = userResults.reduce((prev, rslt) => prev + rslt.data.lObj, 0);
@@ -93,19 +114,19 @@ module.exports = {
 
     if (r.currObjective > r.prevObjective) {
       r.complete = true;
-      return r;
+      return cb(null, r);
     }
 
     // When Gradient is small - converged
-    if (n.norm2(r.Gradient) &lt; CONVERGE_TOL) {
+    if (n.norm2(r.Gradient) &lt; tol) {
       r.complete = true;
-      return r;
+      return cb(null, r);
     }
 
     r.prevObjective = r.currObjective;
     r.prevW = r.currW;
 
-    return r;
+    return cb(null, r);
   },
 };
 </code></pre>
