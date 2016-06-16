@@ -2,6 +2,7 @@
 
 const regression = require('./regression');
 const numeric = require('numeric');
+const get = require('lodash/get');
 
 module.exports = {
   addBias(A) {
@@ -11,37 +12,44 @@ module.exports = {
     return n.transpose(withBias);
   },
 
-  // @TODO assert proper array dims
-  run(opts, cb) {
-    const remoteData = opts.remoteResult ? opts.remoteResult.data : null;
-    const localData = opts.previousData || {};
+  preprocess(opts) {
     const userData = opts.userData;
-    let localLambda;
+    // do some file parsing. here, we're actually using pre-processed data...
+    // so just add some bias and bail!
+    const result = {};
+    result.biasedX = this.addBias(userData.X); // <== take note!
+    result.lambda = userData.lamba || 0.0;
+    result.eta = userData.eta || 1e-1;
+    result.numFeatures = numeric.dim(result.biasedX)[1];
+    return result;
+  },
 
-    // @TODO userData will likely be files.  need to parse user input first
-    const parsed = userData;
+  // @TODO assert proper array dims
+  run(opts) {
+    const result = opts.previousData;
+    const remoteData = get(opts, 'remoteResult.data');
+    const userData = opts.userData;
 
-    parsed.X = this.addBias(parsed.X);
-    // console.log('parsed: ', parsed)
-    if (!remoteData) {
-      localData.kickoff = true;
-      localData.lambda = localLambda = userData.lamba || 0.0;
-      localData.eta = userData.eta || 1e-1;
-      localData.numFeatures = numeric.dim(parsed.X)[1];
-      return cb(null, localData);
-    }
-    const localW = remoteData.currW;
-    localLambda = remoteData.lambda;
-
-    // clean kickoff user s.t. his/her results fall in line with other users
-    delete localData.lambda;
-    delete localData.kickoff;
-    delete localData.eta;
-    delete localData.numFeatures;
+    // clean unused initial data from preprocessing step.
+    delete result.lambda;
+    delete result.kickoff;
+    delete result.eta;
+    delete result.numFeatures;
 
     // begin processing
-    localData.lGrad = regression.gradient(localW, parsed.X, parsed.y, localLambda);
-    localData.lObj = regression.objective(localW, parsed.X, parsed.y, localLambda);
-    return cb(null, localData);
+    result.lGrad = regression.gradient(
+      remoteData.currW,
+      result.biasedX,
+      userData.y,
+      remoteData.lambda
+    );
+    result.lObj = regression.objective(
+      remoteData.currW,
+      result.biasedX,
+      userData.y,
+      remoteData.lambda
+    );
+    console.log(`gradient: ${result.lGrad}, objective: ${result.lObj}`);
+    return result;
   },
 };

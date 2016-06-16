@@ -5,7 +5,7 @@ module.exports = {
   computationPath: path.resolve(__dirname, '../src/index.js'),
   users: [
     {
-      username: 'user1',
+      username: 'jessica',
       userData: {
         X: n.transpose(
           [
@@ -92,7 +92,7 @@ module.exports = {
         raw: true,
       },
     }, {
-      username: 'user2',
+      username: 'jamal',
       userData: {
         X: n.transpose(
           [
@@ -182,11 +182,11 @@ module.exports = {
   ],
   server: {
     preRun: [
-      (done) => {
+      () => {
         // remove randomness from simulation
         const remote = require('../src/remote');
         remote.defaultW = [0.1, 0.1];
-        done();
+        console.log(`stubbing in defaultW as ${remote.defaultW}`);
       },
     ],
   },
