@@ -1,10 +1,27 @@
 'use strict';
 
 const n = require('numeric');
-const values = require('lodash/values');
+const DEFAULT_OBJECTIVE = 1e15;
+const GRADIENT_TOLERANCE = 1e-3;
 
 module.exports = {
   defaultW: null, // may be overwritten for unit testing
+
+  assertUserDatas(opts) {
+    opts.userResults.forEach((usrRslt, ndx, arr) => {
+      if (ndx === 0) { return; }
+      const numFeatures = usrRslt.data.numFeatures;
+      const lastNumFeatures = arr[ndx - 1].data.numFeatures;
+      if (numFeatures !== lastNumFeatures) {
+        const un = usrRslt.username;
+        const lastUn = arr[ndx - 1].username;
+        throw new Error([
+          `${un} reports ${numFeatures} features, but ${lastUn}`,
+          `reports ${lastNumFeatures} features.`,
+        ].join(' '));
+      }
+    });
+  },
 
   /**
    * compute server entry point
@@ -19,48 +36,28 @@ module.exports = {
       prevObjective: null,
       currObjective: null,
       eta: null,
-      step: 1,
-      userStep: {},
+      iteration: 0,
     }, opts.previousData || {});
 
-    // apply user current step(s) to our RemoteComputationResult
-    userResults.forEach((usrRslt) => (r.userStep[usrRslt.username] = usrRslt.data.step));
+    this.assertUserDatas(opts);
 
     // initialize group data
-    if (userResults[0].data.kickoff) {
-      const kickoff = userResults[0].data;
-      r.currW = r.prevW = this.defaultW || n.random([kickoff.numFeatures]);
-      r.prevObjective = 1e15;
-      r.Gradient = n.rep([kickoff.numFeatures], 0);
+    if (r.iteration === 0) {
+      const firstUserResult = userResults[0].data;
+      r.currW = r.prevW = this.defaultW || n.random([firstUserResult.numFeatures]);
+      r.prevObjective = DEFAULT_OBJECTIVE;
+      r.Gradient = n.rep([firstUserResult.numFeatures], 0);
       r.eta = userResults[0].data.eta;
       r.lambda = userResults[0].data.lambda;
-      r.Eg2 = n.rep([kickoff.numFeatures], 0);
-      r.EdW = n.rep([kickoff.numFeatures], 0);
+      r.Eg2 = n.rep([firstUserResult.numFeatures], 0);
+      r.EdW = n.rep([firstUserResult.numFeatures], 0);
       r.rho = 0.99; // watch out for this and the eps
       r.eps = 1e-4;
       r.deltaW = 0;
+      r.iteration = 1;
       return r;
     }
-
-    // wait for all users ready
-    const userStepValues = values(r.userStep);
-    const allUsersMatch = userStepValues.every(uStep => uStep === userStepValues[0]);
-    const allUsersPresent = opts.userResults.length === opts.usernames.length;
-    const shouldBumpStep = allUsersMatch && allUsersPresent;
-
-    const tol = 1e-3;
-
-    if (!allUsersPresent || !allUsersMatch) {
-      return null;
-    }
-    if (r.step === 1000) {
-      r.complete = true;
-      return r;
-    }
-    if (shouldBumpStep) {
-      r.step += 1;
-    }
-    delete r.kickoff;
+    ++r.iteration;
 
     r.currObjective = userResults.reduce((prev, rslt) => prev + rslt.data.lObj, 0);
 
@@ -71,19 +68,21 @@ module.exports = {
     r.EdW = n.add(n.mul(r.rho, r.EdW), n.mul(1 - r.rho, n.mul(r.deltaW, r.deltaW)));
     r.currW = n.add(r.prevW, r.deltaW);
 
-    if (r.currObjective > r.prevObjective) {
+    // test for halting conditions.
+    if (
+      r.currObjective > r.prevObjective ||
+      n.norm2(r.Gradient) < GRADIENT_TOLERANCE ||
+      r.iteration === 250
+    ) {
       r.complete = true;
       return r;
     }
 
-    // When Gradient is small - converged
-    if (n.norm2(r.Gradient) < tol) {
-      r.complete = true;
-      return r;
-    }
-
+    // continue iterating.
     r.prevObjective = r.currObjective;
     r.prevW = r.currW;
+
+    console.log(r);
 
     return r;
   },
