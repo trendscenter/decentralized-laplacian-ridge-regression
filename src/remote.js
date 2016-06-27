@@ -72,7 +72,7 @@ module.exports = {
     if (
       r.currObjective > r.prevObjective ||
       n.norm2(r.Gradient) < GRADIENT_TOLERANCE ||
-      r.iteration === 50
+      r.iteration === 40
     ) {
       r.complete = true;
       return r;
