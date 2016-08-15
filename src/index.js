@@ -1,5 +1,6 @@
 'use strict';
 
+const FreeSurfer = require('freesurfer-parser');
 const pkg = require('../package.json');
 const localRunner = require('./local');
 const remoteRunner = require('./remote');
@@ -7,7 +8,7 @@ const remoteRunner = require('./remote');
 module.exports = {
   name: pkg.name,
   version: pkg.version,
-  plugins: ['group-step'],
+  plugins: ['group-step', 'inputs'],
   local: [
     {
       type: 'function',
@@ -20,6 +21,11 @@ module.exports = {
         return rslt;
       },
       verbose: true,
+      inputs: [{
+        help: 'Select Freesurfer region(s) of interest',
+        label: 'Freesurfer ROI',
+        values: FreeSurfer.validFields,
+      }]
     }, {
       type: 'function',
       fn(opts) { return localRunner.run(opts); },
