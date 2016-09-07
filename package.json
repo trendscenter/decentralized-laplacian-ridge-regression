@@ -37,7 +37,7 @@
     "tape": "^4.5.1"
   },
   "dependencies": {
-    "freesurfer-parser": "0.0.1",
+    "freesurfer-parser": "^0.0.2",
     "jstat": "^1.5.2",
     "lodash": "^4.11.1",
     "numeric": "^1.2.6"
