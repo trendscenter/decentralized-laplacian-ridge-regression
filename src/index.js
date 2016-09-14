@@ -30,7 +30,7 @@ module.exports = {
       }, {
         defaultValue: DEFAULT_MAX_ITERATIONS,
         label: 'Iteration count',
-        type: 'unumber'
+        type: 'number'
       }]
     }, {
       type: 'function',
