@@ -4,6 +4,7 @@ const FreeSurfer = require('freesurfer-parser');
 const pkg = require('../package.json');
 const localRunner = require('./local');
 const remoteRunner = require('./remote');
+const DEFAULT_MAX_ITERATIONS = require('./constants').DEFAULT_MAX_ITERATIONS;
 
 module.exports = {
   name: pkg.name,
@@ -27,7 +28,7 @@ module.exports = {
         type: 'select',
         values: FreeSurfer.validFields,
       }, {
-        defaultValue: 250,
+        defaultValue: DEFAULT_MAX_ITERATIONS,
         label: 'Iteration count',
         type: 'unumber'
       }]

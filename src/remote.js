@@ -2,12 +2,10 @@
 
 const get = require('lodash/get');
 const n = require('numeric');
-const laplacianNoiseRidgeRegression = require('./index');
+const DEFAULT_MAX_ITERATIONS = require('./constants').DEFAULT_MAX_ITERATIONS;
 
 const DEFAULT_OBJECTIVE = 1e15;
 const GRADIENT_TOLERANCE = 1e-3;
-const DEFAULT_MAX_ITERATIONS = laplacianNoiseRidgeRegression.local[0].inputs[1]
-  .defaultValue;
 
 module.exports = {
   defaultW: null, // may be overwritten for unit testing
