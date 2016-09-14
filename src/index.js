@@ -24,7 +24,12 @@ module.exports = {
       inputs: [{
         help: 'Select Freesurfer region(s) of interest',
         label: 'Freesurfer ROI',
+        type: 'select',
         values: FreeSurfer.validFields,
+      }, {
+        defaultValue: 250,
+        label: 'Iteration count',
+        type: 'unumber'
       }]
     }, {
       type: 'function',

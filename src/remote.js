@@ -1,8 +1,13 @@
 'use strict';
 
+const get = require('lodash/get');
 const n = require('numeric');
+const laplacianNoiseRidgeRegression = require('./index');
+
 const DEFAULT_OBJECTIVE = 1e15;
 const GRADIENT_TOLERANCE = 1e-3;
+const DEFAULT_MAX_ITERATIONS = laplacianNoiseRidgeRegression.local[0].inputs[1]
+  .defaultValue;
 
 module.exports = {
   defaultW: null, // may be overwritten for unit testing
@@ -25,8 +30,13 @@ module.exports = {
 
   /**
    * compute server entry point
-   * @param {object} opts
-   * @returns {undefined}
+   * @param {Object} opts
+   * @param {Object} opts.pluginState
+   * @param {(Object|null)} opts.previousData
+   * @param {string[]} opts.usernames
+   * @param {Object[]} opts.userResults Collection of users' local results
+   * documents
+   * @returns {Object}
    */
   run(opts) {
     const userResults = opts.userResults;
@@ -38,6 +48,12 @@ module.exports = {
       eta: null,
       iteration: 0,
     }, opts.previousData || {});
+
+    const maxIterationCount = get(
+      opts,
+      'pluginState.inputs[0][1]',
+      DEFAULT_MAX_ITERATIONS 
+    );
 
     this.assertUserDatas(opts);
 
@@ -72,7 +88,7 @@ module.exports = {
     if (
       r.currObjective > r.prevObjective ||
       n.norm2(r.Gradient) < GRADIENT_TOLERANCE ||
-      r.iteration === 40
+      r.iteration === maxIterationCount
     ) {
       r.complete = true;
       return r;
