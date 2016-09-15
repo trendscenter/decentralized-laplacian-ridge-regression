@@ -39,16 +39,16 @@ function getPreprocessOpts(options) {
         },
       }],
     }, userData),
-  }
+  };
 }
 
-tape('addBias', t => {
+tape('addBias', (t) => {
   const r = local.addBias([[1, 2, 3], [4, 5, 6]]);
   t.deepEquals(r, [[1, 2, 3, 1], [4, 5, 6, 1]], 'bias adds');
   t.end();
 });
 
-tape('preprocess errors', t => {
+tape('preprocess errors', (t) => {
   t.throws(
     local.preprocess.bind(null, getPreprocessOpts({
       inputs: null,
@@ -77,7 +77,7 @@ tape('preprocess errors', t => {
   t.end();
 });
 
-tape('preprocess', t => {
+tape('preprocess', (t) => {
   const lambda = 123;
   const eta = 456;
 
@@ -119,7 +119,7 @@ tape('preprocess', t => {
   t.end();
 });
 
-tape('local run', t => {
+tape('local run', (t) => {
   const opts = {
     previousData: {
       biasedX: [[100, 1], [100, 1]],

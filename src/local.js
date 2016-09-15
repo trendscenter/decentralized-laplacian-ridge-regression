@@ -49,7 +49,7 @@ module.exports = {
     // do some file parsing. here, we're actually using pre-processed data...
     // so just add some bias and bail!
     const result = {};
-    const X = userData.files.map(file => {
+    const X = userData.files.map((file) => {
       const surf = new FreeSurfer({
         string: fs.readFileSync(file.filename).toString(),
       });
@@ -58,11 +58,11 @@ module.exports = {
       return pickFeatures(surf);
     });
     result.biasedX = this.addBias(n.transpose([X]));
-    result.y = userData.files.map((file) => (file.tags.isControl ? 1 : -1));
+    result.y = userData.files.map(file => (file.tags.isControl ? 1 : -1));
     result.lambda = userData.lambda || 0.0;
     result.eta = userData.eta || 1e-1;
     result.numFeatures = numeric.dim(result.biasedX)[1];
-    console.log(result);
+    console.log(result); // eslint-disable-line no-console
     return result;
   },
 
@@ -90,7 +90,9 @@ module.exports = {
       result.y,
       remoteData.lambda
     );
+    /* eslint-disable no-console */
     console.log(`gradient: ${result.lGrad}, objective: ${result.lObj}`);
+    /* eslint-enable no-console */
     return result;
   },
 };

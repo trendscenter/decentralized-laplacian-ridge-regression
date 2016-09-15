@@ -1,6 +1,8 @@
 const path = require('path');
 const n = require('numeric');
 
+const remote = require('../src/remote');
+
 module.exports = {
   computationPath: path.resolve(__dirname, '../src/index.js'),
   users: [
@@ -184,9 +186,10 @@ module.exports = {
     preRun: [
       () => {
         // remove randomness from simulation
-        const remote = require('../src/remote');
         remote.defaultW = [0.1, 0.1];
+        /* eslint-disable no-console */
         console.log(`stubbing in defaultW as ${remote.defaultW}`);
+        /* eslint-enable no-console */
       },
     ],
   },

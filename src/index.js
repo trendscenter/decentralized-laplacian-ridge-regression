@@ -18,7 +18,7 @@ module.exports = {
         // pre-processed data. required s.t. remote compute node can assert
         // that all users have correct data shape (e.g. num features)
         const rslt = localRunner.preprocess(opts);
-        console.log('pre-processing complete.');
+        console.log('pre-processing complete.'); // eslint-disable-line no-console
         return rslt;
       },
       verbose: true,
@@ -30,8 +30,8 @@ module.exports = {
       }, {
         defaultValue: DEFAULT_MAX_ITERATIONS,
         label: 'Iteration count',
-        type: 'number'
-      }]
+        type: 'number',
+      }],
     }, {
       type: 'function',
       fn(opts) { return localRunner.run(opts); },

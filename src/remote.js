@@ -50,7 +50,7 @@ module.exports = {
     const maxIterationCount = get(
       opts,
       'pluginState.inputs[0][1]',
-      DEFAULT_MAX_ITERATIONS 
+      DEFAULT_MAX_ITERATIONS
     );
 
     this.assertUserDatas(opts);
@@ -71,7 +71,7 @@ module.exports = {
       r.iteration = 1;
       return r;
     }
-    ++r.iteration;
+    r.iteration += 1;
 
     r.currObjective = userResults.reduce((prev, rslt) => prev + rslt.data.lObj, 0);
 
@@ -96,7 +96,7 @@ module.exports = {
     r.prevObjective = r.currObjective;
     r.prevW = r.currW;
 
-    console.log(r);
+    console.log(r); // eslint-disable-line no-console
 
     return r;
   },

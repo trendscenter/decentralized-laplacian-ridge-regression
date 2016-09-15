@@ -17,8 +17,9 @@ module.exports = {
    * @return {number} error score
    */
   objective(w, xVals, yVals, lambda) {
-    lambda = lambda || this.defaultLambda;
-    return n.sum(n.pow(n.sub(yVals, n.dot(xVals, w)), 2)) + (lambda * n.dot(w, w) / 2);
+    const localLambda = lambda || this.defaultLambda;
+    return n.sum(n.pow(n.sub(yVals, n.dot(xVals, w)), 2)) +
+      (localLambda * n.dot(w, w) * 0.5);
   },
 
   /**
@@ -34,13 +35,13 @@ module.exports = {
    * @return {array}  gradient values for each mVal
    */
   gradient(w, X, y, lambda) {
-    lambda = lambda || this.defaultLambda;
+    const localLambda = lambda || this.defaultLambda;
     return n.add(
       n.mul(
         -2,
         n.dot(n.transpose(X), n.sub(y, n.dot(X, w)))
       ),
-      n.mul(lambda, w)
+      n.mul(localLambda, w)
     );
   },
 
@@ -55,7 +56,7 @@ module.exports = {
    * @return {array}  w in same order as initialMVals
    */
   oneShot(initialMVals, xVals, yVals) {
-    return n.uncmin((w) => this.objective(w, xVals, yVals), initialMVals).solution;
+    return n.uncmin(w => this.objective(w, xVals, yVals), initialMVals).solution;
   },
 
   /**
