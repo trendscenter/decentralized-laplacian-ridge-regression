@@ -34,6 +34,8 @@ module.exports = {
     }
 
     /**
+     * Pick FreeSurfer features.
+     *
      * @todo: This uses only one feature. Change to use multiple!
      *
      * @param {FreeSurfer} freeSurfer
@@ -41,12 +43,6 @@ module.exports = {
      */
     function pickFeatures(freeSurfer) {
       return freeSurfer[features[0]];
-
-      // return Object.keys(freeSurfer).reduce((memo, key) => {
-      //   return features.indexOf(key) > -1 ?
-      //     memo.concat(freeSurfer[key]) :
-      //     memo;
-      // }, []);
     }
 
     const userData = opts.userData;
@@ -63,7 +59,7 @@ module.exports = {
     });
     result.biasedX = this.addBias(n.transpose([X]));
     result.y = userData.files.map((file) => (file.tags.isControl ? 1 : -1));
-    result.lambda = userData.lamba || 0.0;
+    result.lambda = userData.lambda || 0.0;
     result.eta = userData.eta || 1e-1;
     result.numFeatures = numeric.dim(result.biasedX)[1];
     console.log(result);
