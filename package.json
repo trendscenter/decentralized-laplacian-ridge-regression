@@ -10,13 +10,27 @@
     "publish-patch": "npm run preversion && npm version patch && git push origin master --tags && npm publish",
     "publish-minor": "npm run preversion && npm version minor && git push origin master --tags && npm publish",
     "publish-major": "npm run preversion && npm version major && git push origin master --tags && npm publish",
-    "lint": "eslint src/ test/",
-    "lintfix": "eslint --fix src/ test/",
+    "lint": "eslint src test",
     "docs": "mkdir -p docs && jsdoc -c .jsdoc.json src/",
     "deploy-docs": "gh-pages -d docs && rm -rf docs",
     "postpublish": "npm run docs && npm run deploy-docs"
   },
-  "author": "cdaringe",
+  "author": "NI Development - The Mind Research Network <nidev@mrn.org> (http://coins.mrn.org)",
+  "contributors": [
+    "Chris Dieringer <cdaringe@gmail.org>",
+    "Cory Reed <swashcap@gmail.com>",
+    "Ross Kelly <rkelly@mrn.org>",
+    "Drew Landis <landis.d@gmail.com>",
+    "Sergey Plis <splis@mrn.org>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MRN-Code/decentralized-laplacian-ridge-regression.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MRN-Code/decentralized-laplacian-ridge-regression/issues"
+  },
+  "homepage": "https://github.com/MRN-Code/decentralized-laplacian-ridge-regression#readme",
   "license": "MIT",
   "pre-commit": [
     "validate",
