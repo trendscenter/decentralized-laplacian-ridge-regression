@@ -4,7 +4,7 @@
   "description": "Iterative ridge regression algorithm for COINSTAC.",
   "main": "src/index.js",
   "scripts": {
-    "test": "node test/",
+    "test": "nyc --reporter=lcov --check-coverage --functions=80 --branches=80 node test",
     "validate": "npm ls",
     "preversion": "git checkout master && git pull && npm ls",
     "publish-patch": "npm run preversion && npm version patch && git push origin master --tags && npm publish",
