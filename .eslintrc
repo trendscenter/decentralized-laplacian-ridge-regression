@@ -1,0 +1,15 @@
+{
+  "extends": "airbnb",
+  "rules": {
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true,
+        "optionalDependencies": false,
+        "peerDependencies": false
+      }
+    ],
+    "react/require-extension": "off",
+    "strict": [0, "global"]
+  }
+}

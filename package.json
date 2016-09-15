@@ -1,22 +1,36 @@
 {
   "name": "laplacian-noise-ridge-regression",
   "version": "2.0.3",
-  "description": "",
+  "description": "Iterative ridge regression algorithm for COINSTAC.",
   "main": "src/index.js",
   "scripts": {
-    "test": "node test/",
+    "test": "nyc --reporter=lcov --check-coverage --functions=80 --branches=80 node test",
     "validate": "npm ls",
     "preversion": "git checkout master && git pull && npm ls",
     "publish-patch": "npm run preversion && npm version patch && git push origin master --tags && npm publish",
     "publish-minor": "npm run preversion && npm version minor && git push origin master --tags && npm publish",
     "publish-major": "npm run preversion && npm version major && git push origin master --tags && npm publish",
-    "lint": "eslint src/ test/",
-    "lintfix": "eslint --fix src/ test/",
+    "lint": "eslint src test",
     "docs": "mkdir -p docs && jsdoc -c .jsdoc.json src/",
     "deploy-docs": "gh-pages -d docs && rm -rf docs",
     "postpublish": "npm run docs && npm run deploy-docs"
   },
-  "author": "cdaringe",
+  "author": "NI Development - The Mind Research Network <nidev@mrn.org> (http://coins.mrn.org)",
+  "contributors": [
+    "Chris Dieringer <cdaringe@gmail.org>",
+    "Cory Reed <swashcap@gmail.com>",
+    "Ross Kelly <rkelly@mrn.org>",
+    "Drew Landis <landis.d@gmail.com>",
+    "Sergey Plis <splis@mrn.org>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MRN-Code/decentralized-laplacian-ridge-regression.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MRN-Code/decentralized-laplacian-ridge-regression/issues"
+  },
+  "homepage": "https://github.com/MRN-Code/decentralized-laplacian-ridge-regression#readme",
   "license": "MIT",
   "pre-commit": [
     "validate",
@@ -24,20 +38,19 @@
     "test"
   ],
   "devDependencies": {
-    "coins-validate": "^4.1.2",
-    "eslint": "^2.11.1",
-    "eslint-config-airbnb": "^9.0.1",
+    "eslint": "^3.5.0",
+    "eslint-config-airbnb": "^11.1.0",
     "eslint-plugin-import": "^1.8.1",
-    "eslint-plugin-jsx-a11y": "^1.2.2",
-    "eslint-plugin-react": "^5.1.1",
+    "eslint-plugin-jsx-a11y": "^2.2.2",
+    "eslint-plugin-react": "^6.2.2",
     "gh-pages": "^0.11.0",
     "jsdoc": "^3.4.0",
     "minami": "^1.1.1",
-    "nyc": "^6.4.4",
+    "nyc": "^8.1.0",
     "tape": "^4.5.1"
   },
   "dependencies": {
-    "freesurfer-parser": "0.0.1",
+    "freesurfer-parser": "^0.0.2",
     "jstat": "^1.5.2",
     "lodash": "^4.11.1",
     "numeric": "^1.2.6"

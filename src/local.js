@@ -14,21 +14,55 @@ module.exports = {
     return n.transpose(withBias);
   },
 
+  /**
+   * Pre-process.
+   *
+   * @param {Object} opts
+   * @param {RemoteComputationResult} opts.remoteResult
+   * @param {Project} opts.userData
+   * @returns {Object}
+   */
   preprocess(opts) {
+    const features = get(opts, 'remoteResult.pluginState.inputs[0][0]');
+
+    if (!features || !Array.isArray(features) || !features.length) {
+      throw new Error('Expected inputs containing features');
+    } else if (
+      features.some(f => FreeSurfer.validFields.indexOf(f) < 0)
+    ) {
+      throw new Error(`Unknown FreeSurfer region in inputs: ${features.toString()}`);
+    }
+
+    /**
+     * Pick FreeSurfer features.
+     *
+     * @todo: This uses only one feature. Change to use multiple!
+     *
+     * @param {FreeSurfer} freeSurfer
+     * @returns {Number}
+     */
+    function pickFeatures(freeSurfer) {
+      return freeSurfer[features[0]];
+    }
+
     const userData = opts.userData;
     // do some file parsing. here, we're actually using pre-processed data...
     // so just add some bias and bail!
     const result = {};
-    const X = userData.files
-    .map((file) => fs.readFileSync(file.filename).toString())
-    .map((strSurf) => new FreeSurfer({ string: strSurf }))
-    .map((surf) => surf.TotalGrayVol); // <== feature to assess!
+    const X = userData.files.map((file) => {
+      const surf = new FreeSurfer({
+        string: fs.readFileSync(file.filename).toString(),
+      });
+
+      // Pluck features to assess
+      return pickFeatures(surf);
+    });
     result.biasedX = this.addBias(n.transpose([X]));
-    result.y = userData.files.map((file) => (file.tags.isControl ? 1 : -1));
-    result.lambda = userData.lamba || 0.0;
+    result.y = userData.files.map(file => (file.tags.isControl ? 1 : -1));
+    result.lambda = userData.lambda || 0.0;
     result.eta = userData.eta || 1e-1;
     result.numFeatures = numeric.dim(result.biasedX)[1];
-    console.log(result);
+    console.log(result); // eslint-disable-line no-console
     return result;
   },
 
@@ -56,7 +90,9 @@ module.exports = {
       result.y,
       remoteData.lambda
     );
+    /* eslint-disable no-console */
     console.log(`gradient: ${result.lGrad}, objective: ${result.lObj}`);
+    /* eslint-enable no-console */
     return result;
   },
 };
