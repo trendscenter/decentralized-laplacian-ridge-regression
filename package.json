@@ -53,6 +53,7 @@
     "freesurfer-parser": "^0.0.2",
     "jstat": "^1.5.2",
     "lodash": "^4.11.1",
-    "numeric": "^1.2.6"
+    "numeric": "^1.2.6",
+    "pify": "^2.3.0"
   }
 }

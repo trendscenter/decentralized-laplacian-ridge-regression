@@ -55,6 +55,20 @@ tape('addBias', (t) => {
   t.end();
 });
 
+tape('get normalized tags', (t) => {
+  t.deepEqual(
+    local.getNormalizedTags({
+      z: true,
+      a: 'string',
+      b: false,
+      c: 300,
+    }),
+    [-1, 300, 1],
+    'returns normalized array'
+  );
+  t.end();
+});
+
 tape('preprocess errors', (t) => {
   t.throws(
     local.preprocess.bind(null, getPreprocessOpts({
@@ -88,42 +102,75 @@ tape('preprocess', (t) => {
   const lambda = 123;
   const eta = 456;
 
-  const result1 = local.preprocess(getPreprocessOpts({
+  t.plan(8);
+
+  local.preprocess(getPreprocessOpts({
     inputs: [[['TotalGrayVol', 'Left-Hippocampus']]],
-  }));
-  const result2 = local.preprocess(getPreprocessOpts({
-    inputs: [[['TotalGrayVol', 'Left-Hippocampus']]],
-    userData: {
-      eta,
-      lambda,
-    },
-  }));
+  }))
+    .then((result) => {
+      t.ok(
+        'eta' in result && typeof result.eta === 'number',
+        'sets default eta'
+      );
+      t.ok(
+        'lambda' in result && typeof result.lambda === 'number',
+        'sets default lambda'
+      );
 
-  t.ok(
-    'eta' in result1 && typeof result1.eta === 'number',
-    'sets default eta'
-  );
-  t.ok(
-    'lambda' in result1 && typeof result1.lambda === 'number',
-    'sets default lambda'
-  );
+      t.deepEqual(
+        result.biasedX,
+        [[28, 1], [29, -1], [31, 1]],
+        'transforms files\' tags to co-variates in `biasedX`'
+      );
+      t.deepEqual(
+        result.y,
+        [595000, 565250, 595000],
+        'pulls selected feature from FreeSurfer files'
+      );
+      t.equal(result.numFeatures, 2, 'sets number of features');
 
-  t.deepEqual(
-    result1.biasedX,
-    [[595000, 1], [565250, 1], [595000, 1]],
-    'adds bias to picked "X"'
-  );
-  t.equal(result1.numFeatures, 2, 'sets number of features');
-  t.deepEqual(
-    result1.y,
-    [1, -1, 1],
-    'pulls "y" from files\' tags'
-  );
+      return local.preprocess(getPreprocessOpts({
+        inputs: [[['TotalGrayVol']]],
+        userData: {
+          files: [{
+            filename: path.resolve(__dirname, 'demo/controls/M00000001.txt'),
+            tags: {
+              isControl: true,
+            },
+          }, {
+            filename: path.resolve(__dirname, 'demo/substanceUsers/M00000011.txt'),
+            tags: {
+              isControl: false,
+            },
+          }, {
+            filename: path.resolve(__dirname, 'demo/controls/M00000002.txt'),
+            tags: {
+              isControl: true,
+            },
+          }],
+        },
+      }));
+    })
+    .then((result) => {
+      t.deepEqual(
+        result.biasedX,
+        [[1, 1], [-1, 1], [1, 1]],
+        'adds bias to single co-variate in `biasedX`'
+      );
 
-  t.equal(result2.eta, eta, 'sets eta from user data');
-  t.equal(result2.lambda, lambda, 'sets lambda from user data');
-
-  t.end();
+      return local.preprocess(getPreprocessOpts({
+        inputs: [[['TotalGrayVol', 'Left-Hippocampus']]],
+        userData: {
+          eta,
+          lambda,
+        },
+      }));
+    })
+    .then((result) => {
+      t.equal(result.eta, eta, 'sets eta from user data');
+      t.equal(result.lambda, lambda, 'sets lambda from user data');
+    })
+    .catch(t.end);
 });
 
 tape('local run', (t) => {
