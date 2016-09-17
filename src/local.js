@@ -6,6 +6,7 @@ const get = require('lodash/get');
 const fs = require('fs');
 const FreeSurfer = require('freesurfer-parser');
 const pify = require('pify');
+const DECLARATION_INPUTS_KEY = require('./constants').DECLARATION_INPUTS_KEY;
 
 /**
  * Add bias.
@@ -61,12 +62,25 @@ module.exports = {
    * Pre-process.
    *
    * @param {Object} opts
+   * @param {string} opts.consortiumId
+   * @param {(Object|undefined)} opts.previousData
    * @param {RemoteComputationResult} opts.remoteResult
    * @param {Project} opts.userData
+   * @param {string} opts.username
    * @returns {Object}
    */
   preprocess(opts) {
-    const features = get(opts, 'remoteResult.pluginState.inputs[0][0]');
+    let features = get(opts, 'remoteResult.pluginState.inputs[0][0]');
+
+    /**
+     * Retrieve plugin from user data.
+     *
+     * @todo This is a hack for simulator. Add a simulator hook to modify plugin
+     * state.
+     */
+    if (!features && DECLARATION_INPUTS_KEY in opts.userData) {
+      features = opts.userData[DECLARATION_INPUTS_KEY][0][0];
+    }
 
     if (!features || !Array.isArray(features) || !features.length) {
       throw new Error('Expected inputs containing features');

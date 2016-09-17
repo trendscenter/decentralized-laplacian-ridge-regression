@@ -1,197 +1,115 @@
-const path = require('path');
-const n = require('numeric');
+'use strict';
 
+const DECLARATION_INPUTS_KEY = require('../src/constants').DECLARATION_INPUTS_KEY;
+const path = require('path');
 const remote = require('../src/remote');
+/**
+ * Stub in a ROI. Used in place of `pluginState` inputs for testing.
+ *
+ * @todo Expose plugin state hooks for simulator declaration files.
+ */
+const inputs = [[['TotalGrayVol']]];
+
+// remove randomness from simulation
+remote.defaultW = [0.1, 0.1];
 
 module.exports = {
-  computationPath: path.resolve(__dirname, '../src/index.js'),
-  users: [
-    {
-      username: 'jessica',
-      userData: {
-        X: n.transpose(
-          [
-            [
-              -4.67339189e+02,
-              -1.91739189e+02,
-              2.93060811e+02,
-              -2.20391892e+01,
-              -1.55391892e+01,
-              -6.81391892e+01,
-              -1.60039189e+02,
-              7.18860811e+02,
-              1.38760811e+02,
-              9.15608108e+01,
-              3.39608108e+01,
-              2.36608108e+01,
-              -1.10293919e+03,
-              2.43160811e+02,
-              5.34608108e+01,
-              2.99960811e+02,
-              9.74608108e+01,
-              -1.01313919e+03,
-              3.07660811e+02,
-              -2.61391892e+01,
-              1.35296081e+03,
-              -3.95639189e+02,
-              4.15860811e+02,
-              -6.89391892e+01,
-              -6.79739189e+02,
-              -4.61839189e+02,
-              3.50560811e+02,
-              -5.87639189e+02,
-              -4.07339189e+02,
-              -8.85639189e+02,
-              3.05760811e+02,
-              5.07560811e+02,
-              -4.52439189e+02,
-              -3.24391892e+01,
-              6.90760811e+02,
-              -8.69391892e+01,
-              9.60810811e-01,
-            ],
-          ]
-        ),
-        y: [
-          1,
-          1,
-          -1,
-          -1,
-          -1,
-          -1,
-          1,
-          -1,
-          1,
-          1,
-          -1,
-          -1,
-          1,
-          -1,
-          -1,
-          1,
-          1,
-          -1,
-          -1,
-          -1,
-          -1,
-          1,
-          -1,
-          -1,
-          1,
-          -1,
-          1,
-          -1,
-          -1,
-          1,
-          -1,
-          -1,
-          1,
-          1,
-          -1,
-          1,
-          1,
-        ],
-        raw: true,
+  computationPath: '../src/index.js',
+  local: [{
+    files: [
+      // controls
+      {
+        filename: path.resolve(__dirname, 'demo/controls/M00000001.txt'),
+        tags: { isControl: true },
       },
-    }, {
-      username: 'jamal',
-      userData: {
-        X: n.transpose(
-          [
-            [
-              389.56081081,
-              299.96081081,
-              267.36081081,
-              6.26081081,
-              -1013.13918919,
-              -233.03918919,
-              -86.93918919,
-              18.96081081,
-              -467.33918919,
-              305.76081081,
-              690.76081081,
-              61.46081081,
-              -452.43918919,
-              385.56081081,
-              145.86081081,
-              97.46081081,
-              -26.13918919,
-              507.56081081,
-              -68.13918919,
-              307.66081081,
-              -32.43918919,
-              -68.93918919,
-              -983.73918919,
-              23.66081081,
-              53.46081081,
-              815.06081081,
-              293.06081081,
-              -1683.23918919,
-              -419.53918919,
-              -191.73918919,
-              -587.63918919,
-              -114.03918919,
-              350.56081081,
-              -1102.93918919,
-              138.76081081,
-              -525.83918919,
-              -673.33918919,
-            ],
-          ]
-        ),
-        y: [
-          -1,
-          1,
-          -1,
-          -1,
-          1,
-          -1,
-          1,
-          1,
-          -1,
-          -1,
-          -1,
-          1,
-          1,
-          -1,
-          1,
-          1,
-          1,
-          -1,
-          -1,
-          -1,
-          1,
-          -1,
-          1,
-          1,
-          1,
-          1,
-          -1,
-          1,
-          -1,
-          1,
-          1,
-          -1,
-          -1,
-          1,
-          -1,
-          -1,
-          1,
-        ],
-        raw: true,
+      {
+        filename: path.resolve(__dirname, 'demo/controls/M00000002.txt'),
+        tags: { isControl: true },
       },
-    },
-  ],
-  server: {
-    preRun: [
-      () => {
-        // remove randomness from simulation
-        remote.defaultW = [0.1, 0.1];
-        /* eslint-disable no-console */
-        console.log(`stubbing in defaultW as ${remote.defaultW}`);
-        /* eslint-enable no-console */
+      {
+        filename: path.resolve(__dirname, 'demo/controls/M00000003.txt'),
+        tags: { isControl: true },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/controls/M00000004.txt'),
+        tags: { isControl: true },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/controls/M00000005.txt'),
+        tags: { isControl: true },
+      },
+
+      // substance users
+      {
+        filename: path.resolve(__dirname, 'demo/substanceUsers/M00000011.txt'),
+        tags: { isControl: false },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/substanceUsers/M00000012.txt'),
+        tags: { isControl: false },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/substanceUsers/M00000013.txt'),
+        tags: { isControl: false },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/substanceUsers/M00000014.txt'),
+        tags: { isControl: false },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/substanceUsers/M00000015.txt'),
+        tags: { isControl: false },
       },
     ],
-  },
+    [DECLARATION_INPUTS_KEY]: inputs,
+  }, {
+    files: [
+      // controls
+      {
+        filename: path.resolve(__dirname, 'demo/controls/M00000006.txt'),
+        tags: { isControl: true },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/controls/M00000007.txt'),
+        tags: { isControl: true },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/controls/M00000008.txt'),
+        tags: { isControl: true },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/controls/M00000009.txt'),
+        tags: { isControl: true },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/controls/M00000010.txt'),
+        tags: { isControl: true },
+      },
+
+      // substance users
+      {
+        filename: path.resolve(__dirname, 'demo/substanceUsers/M00000016.txt'),
+        tags: { isControl: false },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/substanceUsers/M00000017.txt'),
+        tags: { isControl: false },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/substanceUsers/M00000018.txt'),
+        tags: { isControl: false },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/substanceUsers/M00000019.txt'),
+        tags: { isControl: false },
+      },
+      {
+        filename: path.resolve(__dirname, 'demo/substanceUsers/M00000020.txt'),
+        tags: { isControl: false },
+      },
+    ],
+    [DECLARATION_INPUTS_KEY]: inputs,
+  }],
   verbose: true,
 };
+
