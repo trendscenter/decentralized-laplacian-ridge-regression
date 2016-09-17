@@ -1,18 +1,32 @@
 'use strict';
 
-const n = require('numeric');
 const regression = require('./regression');
 const numeric = require('numeric');
 const get = require('lodash/get');
 const fs = require('fs');
 const FreeSurfer = require('freesurfer-parser');
 
+/**
+ * Add bias.
+ *
+ * @param {?} A
+ * @returns {Array}
+ */
+function addBias(arr) {
+  if (!Array.isArray(arr) || !arr.length) {
+    throw new Error(`Expected ${arr} to be an array with length`);
+  } else if (!arr.every(Array.isArray)) {
+    throw new Error(`Expected every item of ${arr} to be an array`);
+  }
+
+  return arr.map(row => row.concat(1));
+}
+
 module.exports = {
-  addBias(A) {
-    const tPose = n.transpose(A);
-    const withBias = tPose.concat([n.rep([n.dim(A)[0]], 1)]);
-    return n.transpose(withBias);
-  },
+  /**
+   * @private
+   */
+  addBias,
 
   /**
    * Pre-process.

@@ -43,6 +43,13 @@ function getPreprocessOpts(options) {
 }
 
 tape('addBias', (t) => {
+  t.throws(local.addBias.bind(null), 'throws with no value');
+  t.throws(local.addBias.bind(null, 'hi'), 'throws with non-array value');
+  t.throws(local.addBias.bind(null, []), 'throws with empty array value');
+  t.throws(
+    local.addBias.bind(null, [[], 'hi']),
+    'throws with non-array item'
+  );
   const r = local.addBias([[1, 2, 3], [4, 5, 6]]);
   t.deepEquals(r, [[1, 2, 3, 1], [4, 5, 6, 1]], 'bias adds');
   t.end();
