@@ -125,7 +125,7 @@ module.exports = {
      *
      * If `X` contains multiple co-variates don't add bias.
      */
-    const biasedX = X[0].length === 1 ? addBias(X) : X;
+    const biasedX = addBias(X);
     const result = {
       biasedX,
       eta: userData.eta || 1e-1,
@@ -152,6 +152,7 @@ module.exports = {
             string: data.toString(),
           });
 
+          // filter based on first passed in ROI
           return freeSurfer[features[0]];
         });
 
