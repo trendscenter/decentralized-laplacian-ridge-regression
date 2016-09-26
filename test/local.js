@@ -127,7 +127,7 @@ tape('preprocess', (t) => {
         [595000, 565250, 595000],
         'pulls selected feature from FreeSurfer files'
       );
-      t.equal(result.numFeatures, 2, 'sets number of features');
+      t.equal(result.numFeatures, 3, 'sets number of features');
 
       return local.preprocess(getPreprocessOpts({
         inputs: [[['TotalGrayVol', 'Left-Hippocampus']]],
