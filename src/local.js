@@ -130,7 +130,7 @@ module.exports = {
       biasedX,
       eta: userData.eta || 1e-1,
       lambda: userData.lambda || 0.0,
-      numFeatures: numeric.dim(biasedX)[1],
+      numFeatures: numeric.dim(biasedX)[1] - 1,
     };
 
     return Promise.all(
