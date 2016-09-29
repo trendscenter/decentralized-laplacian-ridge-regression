@@ -1,7 +1,6 @@
 'use strict';
 
 const regression = require('./regression');
-const numeric = require('numeric');
 const get = require('lodash/get');
 const fs = require('fs');
 const FreeSurfer = require('freesurfer-parser');
@@ -130,7 +129,7 @@ module.exports = {
       biasedX,
       eta: userData.eta || 1e-1,
       lambda: userData.lambda || 0.0,
-      numFeatures: numeric.dim(biasedX)[1],
+      numFeatures: biasedX[0].length,
     };
 
     return Promise.all(
