@@ -31,6 +31,17 @@ module.exports = {
         defaultValue: DEFAULT_MAX_ITERATIONS,
         label: 'Iteration count',
         type: 'number',
+      }, {
+        defaultValue: [{
+          name: 'Is Control?',
+          type: 'boolean',
+        }],
+        label: 'Covariates',
+        /**
+         * @todo Determine a better `type` for this input. Something like
+         * "data-map" or "covariate-map" or…something.
+         */
+        type: 'covariates',
       }],
     }, {
       type: 'function',

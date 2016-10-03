@@ -5,15 +5,26 @@ module.exports = {
   defaultLambda: 0.0,
 
   /**
-   * Compute regression error for a set of samples (objective)
+   * Compute regression error for a set of samples (objective).
+   *
    * @note See [Eqn 6]
-   * @param  {array}  w   (aka betas or coefficients): array of betas to
-   *                          correspond to each xVal.
-   * @param  {array}  xVals   2D array where each sub-array contains all xVals
-   *                          for a single sample in the same order as
-   *                          initialMVals
-   * @param  {array}  yVals   array of y values for each sample in xVals
-   * @param  {number} lambda
+   *
+   * @example <caption>Example `xVals`</caption>
+   * const xVals = [
+   *   [<diagnosis 1>, <gender 1>, <age 1>, ...],
+   *   [<diagnosis 2>, <gender 2>, <age 2>, ...],
+   *   [<diagnosis 3>, <gender 3>, <age 3>, ...],
+   *   // ...
+   * ];
+   *
+   * @param {Array} w Betas or coefficients: an array of betas corresponding to
+   * each `xVal`
+   * @param {Array[]} xVals 2D array where each sub-array contains all xVals for
+   * a single sample in the same order as `w` and `yVals
+   * @param {Array} yVals `y` values for each sample in `xVals`. In the case of
+   * the FreeSurfer computation, `yVals` is an array of numbers, where a number
+   * is a region of interest's value.
+   * @param  {number} lambda "regularizer"
    * @return {number} error score
    */
   objective(w, xVals, yVals, lambda) {

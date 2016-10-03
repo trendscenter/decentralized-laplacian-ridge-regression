@@ -13,7 +13,8 @@
     "lint": "eslint src test",
     "docs": "mkdir -p docs && jsdoc -c .jsdoc.json src/",
     "deploy-docs": "gh-pages -d docs && rm -rf docs",
-    "postpublish": "npm run docs && npm run deploy-docs"
+    "postpublish": "npm run docs && npm run deploy-docs",
+    "simulate": "coinstac-simulator -d test/declaration.js"
   },
   "author": "NI Development - The Mind Research Network <nidev@mrn.org> (http://coins.mrn.org)",
   "contributors": [
@@ -38,6 +39,7 @@
     "test"
   ],
   "devDependencies": {
+    "coinstac-simulator": "^2.0.8",
     "eslint": "^3.5.0",
     "eslint-config-airbnb": "^11.1.0",
     "eslint-plugin-import": "^1.8.1",
@@ -53,6 +55,7 @@
     "freesurfer-parser": "^0.0.2",
     "jstat": "^1.5.2",
     "lodash": "^4.11.1",
-    "numeric": "^1.2.6"
+    "numeric": "^1.2.6",
+    "pify": "^2.3.0"
   }
 }

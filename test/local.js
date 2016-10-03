@@ -43,8 +43,29 @@ function getPreprocessOpts(options) {
 }
 
 tape('addBias', (t) => {
+  t.throws(local.addBias.bind(null), 'throws with no value');
+  t.throws(local.addBias.bind(null, 'hi'), 'throws with non-array value');
+  t.throws(local.addBias.bind(null, []), 'throws with empty array value');
+  t.throws(
+    local.addBias.bind(null, [[], 'hi']),
+    'throws with non-array item'
+  );
   const r = local.addBias([[1, 2, 3], [4, 5, 6]]);
   t.deepEquals(r, [[1, 2, 3, 1], [4, 5, 6, 1]], 'bias adds');
+  t.end();
+});
+
+tape('get normalized tags', (t) => {
+  t.deepEqual(
+    local.getNormalizedTags({
+      z: true,
+      a: 'string',
+      b: false,
+      c: 300,
+    }),
+    [-1, 300, 1],
+    'returns normalized array'
+  );
   t.end();
 });
 
@@ -81,42 +102,46 @@ tape('preprocess', (t) => {
   const lambda = 123;
   const eta = 456;
 
-  const result1 = local.preprocess(getPreprocessOpts({
+  t.plan(7);
+
+  local.preprocess(getPreprocessOpts({
     inputs: [[['TotalGrayVol', 'Left-Hippocampus']]],
-  }));
-  const result2 = local.preprocess(getPreprocessOpts({
-    inputs: [[['TotalGrayVol', 'Left-Hippocampus']]],
-    userData: {
-      eta,
-      lambda,
-    },
-  }));
+  }))
+    .then((result) => {
+      t.ok(
+        'eta' in result && typeof result.eta === 'number',
+        'sets default eta'
+      );
+      t.ok(
+        'lambda' in result && typeof result.lambda === 'number',
+        'sets default lambda'
+      );
 
-  t.ok(
-    'eta' in result1 && typeof result1.eta === 'number',
-    'sets default eta'
-  );
-  t.ok(
-    'lambda' in result1 && typeof result1.lambda === 'number',
-    'sets default lambda'
-  );
+      t.deepEqual(
+        result.biasedX,
+        [[28, 1, 1], [29, -1, 1], [31, 1, 1]],
+        'transforms files\' tags to co-variates in `biasedX`'
+      );
+      t.deepEqual(
+        result.y,
+        [595000, 565250, 595000],
+        'pulls selected feature from FreeSurfer files'
+      );
+      t.equal(result.numFeatures, 3, 'sets number of features');
 
-  t.deepEqual(
-    result1.biasedX,
-    [[595000, 1], [565250, 1], [595000, 1]],
-    'adds bias to picked "X"'
-  );
-  t.equal(result1.numFeatures, 2, 'sets number of features');
-  t.deepEqual(
-    result1.y,
-    [1, -1, 1],
-    'pulls "y" from files\' tags'
-  );
-
-  t.equal(result2.eta, eta, 'sets eta from user data');
-  t.equal(result2.lambda, lambda, 'sets lambda from user data');
-
-  t.end();
+      return local.preprocess(getPreprocessOpts({
+        inputs: [[['TotalGrayVol', 'Left-Hippocampus']]],
+        userData: {
+          eta,
+          lambda,
+        },
+      }));
+    })
+    .then((result) => {
+      t.equal(result.eta, eta, 'sets eta from user data');
+      t.equal(result.lambda, lambda, 'sets lambda from user data');
+    })
+    .catch(t.end);
 });
 
 tape('local run', (t) => {

@@ -65,8 +65,8 @@ module.exports = {
       r.lambda = userResults[0].data.lambda;
       r.Eg2 = n.rep([firstUserResult.numFeatures], 0);
       r.EdW = n.rep([firstUserResult.numFeatures], 0);
-      r.rho = 0.99; // watch out for this and the eps
-      r.eps = 1e-4;
+      r.rho = 0.5; // watch out for this and the eps
+      r.eps = 0.1;
       r.deltaW = 0;
       r.iteration = 1;
       return r;
