@@ -52,6 +52,7 @@
     "tape": "^4.5.1"
   },
   "dependencies": {
+    "distributions":"^1.0.0",
     "freesurfer-parser": "^0.0.2",
     "jstat": "^1.5.2",
     "lodash": "^4.11.1",
