@@ -1,6 +1,6 @@
 {
   "name": "laplacian-noise-ridge-regression",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Iterative ridge regression algorithm for COINSTAC.",
   "main": "src/index.js",
   "scripts": {
@@ -61,6 +61,8 @@
   "coinstac": {
     "description": "Iterative decentralized ridge regression.",
     "name": "Multi-Shot Ridge Regression",
-    "tags": ["regression"]
+    "tags": [
+      "regression"
+    ]
   }
 }
