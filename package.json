@@ -57,5 +57,10 @@
     "lodash": "^4.11.1",
     "numeric": "^1.2.6",
     "pify": "^2.3.0"
+  },
+  "coinstac": {
+    "description": "Iterative decentralized ridge regression.",
+    "name": "Multi-Shot Ridge Regression",
+    "tags": ["regression"]
   }
 }
