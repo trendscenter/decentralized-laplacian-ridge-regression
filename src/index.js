@@ -146,9 +146,10 @@ module.exports = {
   remote: {
     type: 'function',
     fn(opts) { 
-
-     console.log('opts.userResults[0].data.endOfIteration is ', opts.userResults[0].data.endOfIteration);
-     console.log('opts.userResults[0].data.statisticStep is ', opts.userResults[0].data.statisticStep);
+     
+     // Extract X and y variate name from userData
+     const X_label=Object.keys(opts.userResults[0].userData.files[0].tags);
+     const y_label=opts.userResults[0].userData.__DECLARATION_INPUTS_KEY__[0][0];
      
      if ((opts.userResults[0].data.endOfIteration == true) && (opts.userResults[0].data.statisticStep == 0)){
          // if statisticStep==0, remote node calculates the globalMeanY and return it to local node
@@ -244,6 +245,8 @@ module.exports = {
         rSquaredGlobal,
         tValueGlobal,
         pValueGlobal,
+        X_label,
+        y_label,
         complete: true,
       };
 
