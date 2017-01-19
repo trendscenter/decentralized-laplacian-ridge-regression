@@ -88,9 +88,9 @@ module.exports = {
       n.norm2(r.Gradient) < GRADIENT_TOLERANCE ||
       r.iteration === maxIterationCount
     ) {
-    // indicate the iteration for searching converged W is ended 
-       r.endOfIteration = true;
-       r.statisticStep = 0;
+    // indicate the iteration for searching converged W is ended
+      r.endOfIteration = true;
+      r.statisticStep = 0;
       return r;
     }
 
