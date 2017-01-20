@@ -191,22 +191,25 @@ module.exports = {
     return result;
   },
 
-  getStatistics(opts) {
-  // if W doesn't merge, return run(), if W merge, return statistic()
-//        console.log('opts.remoteResult.data is',opts.remoteResult.data);
-//         console.log('opts.previousData is', opts.previousData);
-    /* eslint-disable no-console */
-    console.log('opts.remoteResult.data.endOfIteration is', opts.remoteResult.data.endOfIteration);
-    console.log('opts.remoteResult.data.statisticStep is', opts.remoteResult.data.statisticStep);
-    /* eslint-enable no-console */
-
+  /**
+   * Get statistics output.
+   *
+   * @param {Object} opts
+   * @param {Object} opts.remoteResult
+   * @param {Object} opts.previousData
+   * @returns {Object}
+   */
+  getStatistics({
+    previousData,
+    remoteResult,
+  }) {
     if (
-      (opts.remoteResult.data.endOfIteration === true) &&
-      (opts.remoteResult.data.statisticStep === 0)
+      remoteResult.data.endOfIteration === true &&
+      remoteResult.data.statisticStep === 0
     ) {
       // step 0 calculate local statistics and localYMean
-      const biasedX = opts.previousData.biasedX;
-      const y = opts.previousData.y;
+      const biasedX = previousData.biasedX;
+      const y = previousData.y;
       const localCount = y.length;
       const betaVector = regression.oneShot(biasedX, y);
       const rSquared = regression.rSquared(biasedX, y, betaVector);
@@ -231,19 +234,19 @@ module.exports = {
         statisticStep: 0,
       };
     } else if (
-      opts.remoteResult.data.endOfIteration === true &&
-      opts.remoteResult.data.statisticStep === 1
+      remoteResult.data.endOfIteration === true &&
+      remoteResult.data.statisticStep === 1
     ) {
       // step 1 receive the globalMeanY and currW, then calculate sseLocal,
       // sstLocal and varXLocal
 
-      const globalMeanY = opts.remoteResult.data.globalMeanY;
-      const currW = opts.remoteResult.data.currW;
-      const biasedX = opts.previousData.biasedX;
-      const y = opts.previousData.y;
-      const rSquared = opts.previousData.rSquared;
-      const tValue = opts.previousData.tValue;
-      const pValue = opts.previousData.pValue;
+      const globalMeanY = remoteResult.data.globalMeanY;
+      const currW = remoteResult.data.currW;
+      const biasedX = previousData.biasedX;
+      const y = previousData.y;
+      const rSquared = previousData.rSquared;
+      const tValue = previousData.tValue;
+      const pValue = previousData.pValue;
       const localCount = y.length;
 
       // calculate the local r squred and t value for averageBetaVector)
@@ -289,6 +292,9 @@ module.exports = {
       };
     }
 
-    return this.run(opts);
+    return this.run({
+      previousData,
+      remoteResult,
+    });
   },
 };
