@@ -1,5 +1,6 @@
 'use strict';
 
+const debug = require('debug')('coinstac:multishot');
 const distributions = require('distributions');
 const n = require('numeric');
 
@@ -70,11 +71,9 @@ module.exports = {
    */
   oneShot(xVals, yVals, initialMVals) {
     const localInitialMVals = initialMVals || n.random(n.dim(xVals[0]));
-    /* eslint-disable no-console */
-    console.log('xVals are:', xVals);
-    console.log('yVals are:', yVals);
-    console.log('localInitialMVals are:', localInitialMVals);
-    /* eslint-enable no-console */
+    debug('xVals are: %O', xVals);
+    debug('yVals are: %O', yVals);
+    debug('localInitialMVals are: %O', localInitialMVals);
     return n.uncmin(w => this.objective(w, xVals, yVals), localInitialMVals, 0.001).solution;
   },
 

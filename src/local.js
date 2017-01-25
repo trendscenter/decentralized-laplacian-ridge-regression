@@ -5,6 +5,7 @@ const fs = require('fs');
 const FreeSurfer = require('freesurfer-parser');
 const pify = require('pify');
 const n = require('numeric');
+const debug = require('debug')('coinstac:multishot');
 const regression = require('./regression');
 const { DECLARATION_INPUTS_KEY, RUN_STEP_KEY } = require('./constants');
 
@@ -81,9 +82,7 @@ function iterate(opts) {
     result.y,
     remoteData.lambda
   );
-  /* eslint-disable no-console */
-  console.log(`gradient: ${result.lGrad}, objective: ${result.lObj}`);
-  /* eslint-enable no-console */
+  debug(`gradient: ${result.lGrad}, objective: ${result.lObj}`);
   return result;
 }
 
@@ -115,9 +114,7 @@ function getInitialStatistics({
     y,
   };
 
-  /* eslint-disable no-console */
-  console.log('local.getInitialStatistics', response);
-  /* eslint-enable no-console */
+  debug('local.getInitialStatistics: %O', response);
 
   return response;
 }
@@ -179,9 +176,7 @@ function getFinalStatistics({
     ),
   };
 
-  /* eslint-disable no-console */
-  console.log('local.getFinalStatistics', response);
-  /* eslint-enable no-console */
+  debug('local.getFinalStatistics: %O', response);
 
   return response;
 }
@@ -309,7 +304,7 @@ module.exports = {
   run(options) {
     const runStep = get(options, `remoteResult.data.${RUN_STEP_KEY}`, 0);
 
-    console.log('Local run step: %d', runStep);
+    debug('Local run step: %d', runStep);
 
     if (runStep === 1) {
       return getInitialStatistics(options);

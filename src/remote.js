@@ -1,5 +1,6 @@
 'use strict';
 
+const debug = require('debug')('coinstac:multishot');
 const get = require('lodash/get');
 const n = require('numeric');
 const { DEFAULT_MAX_ITERATIONS, RUN_STEP_KEY } = require('./constants');
@@ -52,7 +53,7 @@ function iterate(opts) {
   );
 
   assertUserDatas(opts);
-  console.log('remote.run fired'); // eslint-disable-line no-console
+  debug('remote.run fired');
 
   // initialize group data
   if (r.iteration === 0) {
@@ -89,7 +90,7 @@ function iterate(opts) {
   ) {
     r[RUN_STEP_KEY] = 1;
 
-    console.log('remote.run complete', r); // eslint-disable-line no-console
+    debug('remote.run complete: %O', r);
     return r;
   }
 
@@ -97,7 +98,7 @@ function iterate(opts) {
   r.prevObjective = r.currObjective;
   r.prevW = r.currW;
 
-  console.log('remote.run continuing', r); // eslint-disable-line no-console
+  debug('remote.run continuing: %O', r);
 
   return r;
 }
@@ -117,7 +118,7 @@ function getInitialStatistics({
 }) {
   // Not all user results contain betas. Return early.
   if (userResults.some(userResult => !get(userResult, 'data.betaVector'))) {
-    console.log('remote.getInitialStatistics: return early');
+    debug('remote.getInitialStatistics: return early');
     return previousData;
   }
 
@@ -141,7 +142,7 @@ function getInitialStatistics({
     globalMeanY: totalY / globalYCount,
   };
 
-  console.log('remote.getInitialStatistics', response); // eslint-disable-line no-console
+  debug('remote.getInitialStatistics: %O', response);
 
   return response;
 }
@@ -160,7 +161,7 @@ function getFinalStatistics({
   },
   userResults,
 }) {
-  console.log('remote.getFinalStatistics', userResults); // eslint-disable-line no-console
+  debug('remote.getFinalStatistics: %O', userResults);
 
   /**
    * Create a data structure that mirrors src/local.js's
@@ -234,7 +235,7 @@ function getFinalStatistics({
     original: totals.original,
   };
 
-  console.log('remote.getFinalStatistics', response); // eslint-disable-line no-console
+  debug('remote.getFinalStatistics: %O', response);
 
   return response;
 }
@@ -252,7 +253,7 @@ module.exports = {
   run(options) {
     const runStep = get(options, `previousData.${RUN_STEP_KEY}`, 0);
 
-    console.log('Remote run step: %d', runStep);
+    debug('Remote run step: %d', runStep);
 
     if (runStep === 1) {
       return getInitialStatistics(options);
