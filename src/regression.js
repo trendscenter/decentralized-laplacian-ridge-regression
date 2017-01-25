@@ -1,4 +1,6 @@
 'use strict';
+
+const distributions = require('distributions');
 const n = require('numeric');
 
 module.exports = {
@@ -97,6 +99,25 @@ module.exports = {
    */
   applyModel(w, xVals) {
     return n.dot(xVals, w);
+  },
+
+  /**
+   * Get p-value.
+   *
+   * {@link
+   * https://github.com/AndreasMadsen/distributions#studenttdf---the-student-t-distribution}
+   *
+   * @param {number} df Degrees of freedom for t-distribution. This is the count
+   * of FreeSurfer region-of-interest values, or `y.length`.
+   * @param {number[]} tValue
+   * @returns {Array} pValue
+   */
+  getPValue(df, tValue) {
+    /* eslint-disable new-cap */
+    const tDistribution = distributions.Studentt(df);
+    /* eslint-enable new-cap */
+
+    return n.mul(2, n.sub(1, tValue.map(t => tDistribution.cdf(t))));
   },
 
   /** Calculate r squared (goodness of fitting) **/

@@ -1,13 +1,12 @@
 'use strict';
 
-const distributions = require('distributions');
 const get = require('lodash/get');
 const fs = require('fs');
 const FreeSurfer = require('freesurfer-parser');
 const pify = require('pify');
 const n = require('numeric');
 const regression = require('./regression');
-const DECLARATION_INPUTS_KEY = require('./constants').DECLARATION_INPUTS_KEY;
+const { DECLARATION_INPUTS_KEY, RUN_STEP_KEY } = require('./constants');
 
 /**
  * Add bias.
@@ -46,6 +45,145 @@ function getNormalizedTags(tags) {
 
     return memo;
   }, []);
+}
+
+/**
+ * Iterate local client.
+ *
+ * @todo assert proper array dims
+ *
+ * @param {Object} opts
+ * @param {Object} opts.previousData
+ * @param {Object} opts.remoteResult
+ * @param {Object} opts.remoteResult.data
+ * @returns {Object}
+ */
+function iterate(opts) {
+  const result = opts.previousData;
+  const remoteData = get(opts, 'remoteResult.data');
+
+  // clean unused initial data from preprocessing step.
+  delete result.lambda;
+  delete result.kickoff;
+  delete result.eta;
+  delete result.numFeatures;
+
+  // begin processing
+  result.lGrad = regression.gradient(
+    remoteData.currW,
+    result.biasedX,
+    result.y,
+    remoteData.lambda
+  );
+  result.lObj = regression.objective(
+    remoteData.currW,
+    result.biasedX,
+    result.y,
+    remoteData.lambda
+  );
+  /* eslint-disable no-console */
+  console.log(`gradient: ${result.lGrad}, objective: ${result.lObj}`);
+  /* eslint-enable no-console */
+  return result;
+}
+
+/**
+ * Get statistics output.
+ *
+ * @param {Object} opts
+ * @param {Object} opts.remoteResult
+ * @param {Object} opts.previousData
+ * @returns {Object}
+ */
+function getInitialStatistics({
+  previousData: {
+    biasedX,
+    y,
+  },
+}) {
+  const yCount = y.length;
+  const betaVector = regression.oneShot(biasedX, y);
+  const tValue = regression.tValue(biasedX, y, betaVector);
+
+  const response = {
+    betaVector,
+    biasedX,
+    meanY: n.sum(y) / yCount,
+    pValue: regression.getPValue(yCount, tValue),
+    rSquared: regression.rSquared(biasedX, y, betaVector),
+    tValue,
+    y,
+  };
+
+  /* eslint-disable no-console */
+  console.log('local.getInitialStatistics', response);
+  /* eslint-enable no-console */
+
+  return response;
+}
+
+/**
+ * Get final statistics.
+ *
+ * @param {Object} opts
+ * @param {Object} opts.previousData
+ * @param {number[]} opts.previousData.biasedX
+ * @param {number[]} opts.previousData.pValue
+ * @param {number[]} opts.previousData.tValue
+ * @param {number[]} opts.previousData.y
+ * @param {number} opts.previousData.rSquared
+ * @param {Object} opts.remoteResult
+ * @param {Object} opts.remoteResult.data
+ * @param {number[]} opts.remoteResult.data.currW
+ * @param {Object} opts.remoteResult.data.globalMeanY
+ * @returns {Object}
+ */
+function getFinalStatistics({
+  previousData: {
+    betaVector,
+    biasedX,
+    pValue,
+    rSquared,
+    tValue,
+    y,
+  },
+  remoteResult: {
+    data: {
+      currW,
+      globalMeanY,
+    },
+  },
+}) {
+  const yCount = y.length;
+  const localTValue = regression.tValue(biasedX, y, currW);
+  const varXLocalMatrix = n.dot(n.transpose(biasedX), biasedX);
+
+  const response = {
+    local: {
+      betaVector,
+      pValue: regression.getPValue(yCount, localTValue),
+      rSquared: regression.rSquared(biasedX, y, currW),
+      sse: n.sum(n.pow(n.sub(y, n.dot(biasedX, currW)), 2)),
+      sst: n.sum(n.pow(n.sub(y, n.rep(n.dim(y), globalMeanY)), 2)),
+      tValue: localTValue,
+      yCount,
+    },
+    original: {
+      pValue,
+      rSquared,
+      tValue,
+    },
+    varXLocal: currW.reduce(
+      (memo, beta, i) => memo.concat(varXLocalMatrix[i][i]),
+      []
+    ),
+  };
+
+  /* eslint-disable no-console */
+  console.log('local.getFinalStatistics', response);
+  /* eslint-enable no-console */
+
+  return response;
 }
 
 module.exports = {
@@ -161,140 +299,25 @@ module.exports = {
       });
   },
 
-  // @TODO assert proper array dims
-  run(opts) {
-    const result = opts.previousData;
-    const remoteData = get(opts, 'remoteResult.data');
-
-    // clean unused initial data from preprocessing step.
-    delete result.lambda;
-    delete result.kickoff;
-    delete result.eta;
-    delete result.numFeatures;
-
-    // begin processing
-    result.lGrad = regression.gradient(
-      remoteData.currW,
-      result.biasedX,
-      result.y,
-      remoteData.lambda
-    );
-    result.lObj = regression.objective(
-      remoteData.currW,
-      result.biasedX,
-      result.y,
-      remoteData.lambda
-    );
-    /* eslint-disable no-console */
-    console.log(`gradient: ${result.lGrad}, objective: ${result.lObj}`);
-    /* eslint-enable no-console */
-    return result;
-  },
-
   /**
-   * Get statistics output.
+   * Local run.
    *
-   * @param {Object} opts
-   * @param {Object} opts.remoteResult
-   * @param {Object} opts.previousData
+   * @param {Object} options
+   * @param {Object} options.remoteResult
    * @returns {Object}
    */
-  getStatistics({
-    previousData,
-    remoteResult,
-  }) {
-    if (
-      remoteResult.data.endOfIteration === true &&
-      remoteResult.data.statisticStep === 0
-    ) {
-      // step 0 calculate local statistics and localYMean
-      const biasedX = previousData.biasedX;
-      const y = previousData.y;
-      const localCount = y.length;
-      const betaVector = regression.oneShot(biasedX, y);
-      const rSquared = regression.rSquared(biasedX, y, betaVector);
-      const tValue = regression.tValue(biasedX, y, betaVector);
-      /* eslint-disable new-cap */
-      const tdist = distributions.Studentt(localCount - 1);
-      /* eslint-enable new-cap */
-      const tcdf = tValue.map(r => tdist.cdf(r));
-      const pValue = n.mul(2, n.sub(1, tcdf));
-      const localMeanY = n.sum(y) / localCount;
+  run(options) {
+    const runStep = get(options, `remoteResult.data.${RUN_STEP_KEY}`, 0);
 
-      return {
-        betaVector,
-        localCount,
-        localMeanY,
-        rSquared,
-        tValue,
-        pValue,
-        biasedX,
-        y,
-        endOfIteration: true,
-        statisticStep: 0,
-      };
-    } else if (
-      remoteResult.data.endOfIteration === true &&
-      remoteResult.data.statisticStep === 1
-    ) {
-      // step 1 receive the globalMeanY and currW, then calculate sseLocal,
-      // sstLocal and varXLocal
+    console.log('Local run step: %d', runStep);
 
-      const globalMeanY = remoteResult.data.globalMeanY;
-      const currW = remoteResult.data.currW;
-      const biasedX = previousData.biasedX;
-      const y = previousData.y;
-      const rSquared = previousData.rSquared;
-      const tValue = previousData.tValue;
-      const pValue = previousData.pValue;
-      const localCount = y.length;
-
-      // calculate the local r squred and t value for averageBetaVector)
-      const rSquaredLocal = regression.rSquared(biasedX, y, currW);
-      const tValueLocal = regression.tValue(biasedX, y, currW);
-      /* eslint-disable new-cap */
-      const tdist = distributions.Studentt(localCount - 1);
-      /* eslint-enable new-cap */
-      const tcdf = tValueLocal.map(r => tdist.cdf(r));
-      const pValueLocal = n.mul(2, n.sub(1, tcdf));
-
-      // calculate sseLocal and sstLocal
-      const sseLocal = n.sum(n.pow(n.sub(y, n.dot(biasedX, currW)), 2));
-      const sstLocal = n.sum(n.pow(n.sub(y, n.rep(n.dim(y), globalMeanY)), 2));
-
-      // calculate varXLocal
-      const varXLocalMatrix = n.dot(n.transpose(biasedX), biasedX);
-      const varXLocal = [];
-      for (let i = 0; i < currW.length; i += 1) {
-        varXLocal.push(varXLocalMatrix[i][i]);
-      }
-
-      /* eslint-disable no-console */
-      console.log('local r squared for currW', rSquaredLocal);
-      console.log('local t Values for currW', tValueLocal);
-      console.log('local p Values for currW', pValueLocal);
-      /* eslint-enable no-console */
-
-      return {
-        sseLocal,
-        sstLocal,
-        varXLocal,
-        currW,
-        localCount,
-        rSquared,
-        tValue,
-        pValue,
-        rSquaredLocal,
-        tValueLocal,
-        pValueLocal,
-        endOfIteration: true,
-        statisticStep: 1,
-      };
+    if (runStep === 1) {
+      return getInitialStatistics(options);
+    } else if (runStep === 2) {
+      return getFinalStatistics(options);
     }
 
-    return this.run({
-      previousData,
-      remoteResult,
-    });
+    return iterate(options);
   },
 };
+
