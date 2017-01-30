@@ -14,7 +14,7 @@
     "docs": "mkdir -p docs && jsdoc -c .jsdoc.json src/",
     "deploy-docs": "gh-pages -d docs && rm -rf docs",
     "postpublish": "npm run docs && npm run deploy-docs",
-    "simulate": "coinstac-simulator -d test/declaration.js"
+    "simulate": "cross-env BLUEBIRD_WARNINGS=0 coinstac-simulator -d test/declaration.js"
   },
   "author": "NI Development - The Mind Research Network <nidev@mrn.org> (http://coins.mrn.org)",
   "contributors": [
@@ -39,7 +39,8 @@
     "test"
   ],
   "devDependencies": {
-    "coinstac-simulator": "^2.0.8",
+    "coinstac-simulator": "^2.2.2",
+    "cross-env": "^3.1.4",
     "eslint": "^3.5.0",
     "eslint-config-airbnb": "^11.1.0",
     "eslint-plugin-import": "^1.8.1",
@@ -52,6 +53,8 @@
     "tape": "^4.5.1"
   },
   "dependencies": {
+    "debug": "^2.6.0",
+    "distributions": "^1.0.0",
     "freesurfer-parser": "^0.0.2",
     "jstat": "^1.5.2",
     "lodash": "^4.11.1",

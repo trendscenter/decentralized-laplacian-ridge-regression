@@ -1,4 +1,7 @@
 'use strict';
+
+const debug = require('debug')('coinstac:multishot');
+const distributions = require('distributions');
 const n = require('numeric');
 
 module.exports = {
@@ -66,8 +69,12 @@ module.exports = {
    * @param  {array}  yVals   array of y values for each sample in xVals
    * @return {array}  w in same order as initialMVals
    */
-  oneShot(initialMVals, xVals, yVals) {
-    return n.uncmin(w => this.objective(w, xVals, yVals), initialMVals).solution;
+  oneShot(xVals, yVals, initialMVals) {
+    const localInitialMVals = initialMVals || n.random(n.dim(xVals[0]));
+    debug('xVals are: %O', xVals);
+    debug('yVals are: %O', yVals);
+    debug('localInitialMVals are: %O', localInitialMVals);
+    return n.uncmin(w => this.objective(w, xVals, yVals), localInitialMVals, 0.001).solution;
   },
 
   /**
@@ -91,6 +98,51 @@ module.exports = {
    */
   applyModel(w, xVals) {
     return n.dot(xVals, w);
+  },
+
+  /**
+   * Get p-value.
+   *
+   * {@link
+   * https://github.com/AndreasMadsen/distributions#studenttdf---the-student-t-distribution}
+   *
+   * @param {number} df Degrees of freedom for t-distribution. This is the count
+   * of FreeSurfer region-of-interest values, or `y.length`.
+   * @param {number[]} tValue
+   * @returns {Array} pValue
+   */
+  getPValue(df, tValue) {
+    /* eslint-disable new-cap */
+    const tDistribution = distributions.Studentt(df);
+    /* eslint-enable new-cap */
+
+    return n.mul(2, n.sub(1, tValue.map(t => tDistribution.cdf(t))));
+  },
+
+  /** Calculate r squared (goodness of fitting) **/
+  rSquared(xVals, yVals, betaVector) {
+    const SSresidual = n.sum(n.pow(n.sub(yVals, n.dot(xVals, betaVector)), 2));
+    const meanyVals = n.sum(yVals) / yVals.length;
+    const SStotal = n.sum(n.pow(n.sub(yVals, n.rep(n.dim(yVals), meanyVals)), 2));
+    return 1 - (SSresidual / SStotal);
+  },
+
+  /** Calculate tValues (regressor significance) **/
+  tValue(xVals, yVals, betaVector) {
+    const varError = (1 / (n.dim(yVals) - 2)) *
+      (n.sum(n.pow(n.sub(yVals, n.dot(xVals, betaVector)), 2)));
+    const varBeta = n.mul(n.inv(n.dot(n.transpose(xVals), xVals)), varError);
+    // initialize seBeta list
+    const seBeta = [];
+    for (let i = 0; i < betaVector.length; i += 1) {
+      seBeta.push(Math.sqrt(varBeta[i][i]));
+    }
+    // calcualte the T value from seBeta
+    const tValue = [];
+    for (let i = 0; i < betaVector.length; i += 1) {
+      tValue.push(betaVector[i] / seBeta[i]);
+    }
+    return tValue;
   },
 
 };

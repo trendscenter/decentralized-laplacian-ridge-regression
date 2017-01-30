@@ -1,11 +1,13 @@
 'use strict';
 
-const regression = require('./regression');
 const get = require('lodash/get');
 const fs = require('fs');
 const FreeSurfer = require('freesurfer-parser');
 const pify = require('pify');
-const DECLARATION_INPUTS_KEY = require('./constants').DECLARATION_INPUTS_KEY;
+const n = require('numeric');
+const debug = require('debug')('coinstac:multishot');
+const regression = require('./regression');
+const { DECLARATION_INPUTS_KEY, RUN_STEP_KEY } = require('./constants');
 
 /**
  * Add bias.
@@ -44,6 +46,139 @@ function getNormalizedTags(tags) {
 
     return memo;
   }, []);
+}
+
+/**
+ * Iterate local client.
+ *
+ * @todo assert proper array dims
+ *
+ * @param {Object} opts
+ * @param {Object} opts.previousData
+ * @param {Object} opts.remoteResult
+ * @param {Object} opts.remoteResult.data
+ * @returns {Object}
+ */
+function iterate(opts) {
+  const result = opts.previousData;
+  const remoteData = get(opts, 'remoteResult.data');
+
+  // clean unused initial data from preprocessing step.
+  delete result.lambda;
+  delete result.kickoff;
+  delete result.eta;
+  delete result.numFeatures;
+
+  // begin processing
+  result.lGrad = regression.gradient(
+    remoteData.currW,
+    result.biasedX,
+    result.y,
+    remoteData.lambda
+  );
+  result.lObj = regression.objective(
+    remoteData.currW,
+    result.biasedX,
+    result.y,
+    remoteData.lambda
+  );
+  debug(`gradient: ${result.lGrad}, objective: ${result.lObj}`);
+  return result;
+}
+
+/**
+ * Get statistics output.
+ *
+ * @param {Object} opts
+ * @param {Object} opts.remoteResult
+ * @param {Object} opts.previousData
+ * @returns {Object}
+ */
+function getInitialStatistics({
+  previousData: {
+    biasedX,
+    y,
+  },
+}) {
+  const yCount = y.length;
+  const betaVector = regression.oneShot(biasedX, y);
+  const tValue = regression.tValue(biasedX, y, betaVector);
+
+  const response = {
+    betaVector,
+    biasedX,
+    meanY: n.sum(y) / yCount,
+    pValue: regression.getPValue(yCount, tValue),
+    rSquared: regression.rSquared(biasedX, y, betaVector),
+    tValue,
+    y,
+  };
+
+  debug('local.getInitialStatistics: %O', response);
+
+  return response;
+}
+
+/**
+ * Get final statistics.
+ *
+ * @param {Object} opts
+ * @param {Object} opts.previousData
+ * @param {number[]} opts.previousData.biasedX
+ * @param {number[]} opts.previousData.pValue
+ * @param {number[]} opts.previousData.tValue
+ * @param {number[]} opts.previousData.y
+ * @param {number} opts.previousData.rSquared
+ * @param {Object} opts.remoteResult
+ * @param {Object} opts.remoteResult.data
+ * @param {number[]} opts.remoteResult.data.currW
+ * @param {Object} opts.remoteResult.data.globalMeanY
+ * @returns {Object}
+ */
+function getFinalStatistics({
+  previousData: {
+    betaVector,
+    biasedX,
+    pValue,
+    rSquared,
+    tValue,
+    y,
+  },
+  remoteResult: {
+    data: {
+      currW,
+      globalMeanY,
+    },
+  },
+}) {
+  const yCount = y.length;
+  const localTValue = regression.tValue(biasedX, y, currW);
+  const varXLocalMatrix = n.dot(n.transpose(biasedX), biasedX);
+
+  const response = {
+    local: {
+      betaVector,
+      pValue: regression.getPValue(yCount, localTValue),
+      rSquared: regression.rSquared(biasedX, y, currW),
+      sse: n.sum(n.pow(n.sub(y, n.dot(biasedX, currW)), 2)),
+      sst: n.sum(n.pow(n.sub(y, n.rep(n.dim(y), globalMeanY)), 2)),
+      tValue: localTValue,
+      yCount,
+    },
+    original: {
+      pValue,
+      rSquared,
+      tValue,
+    },
+    varXLocal: currW.reduce(
+      (memo, beta, i) => memo.concat(varXLocalMatrix[i][i]),
+      []
+    ),
+  };
+
+  debug('local.getFinalStatistics: %O', response);
+
+  return response;
 }
 
 module.exports = {
@@ -159,33 +294,25 @@ module.exports = {
       });
   },
 
-  // @TODO assert proper array dims
-  run(opts) {
-    const result = opts.previousData;
-    const remoteData = get(opts, 'remoteResult.data');
+  /**
+   * Local run.
+   *
+   * @param {Object} options
+   * @param {Object} options.remoteResult
+   * @returns {Object}
+   */
+  run(options) {
+    const runStep = get(options, `remoteResult.data.${RUN_STEP_KEY}`, 0);
 
-    // clean unused initial data from preprocessing step.
-    delete result.lambda;
-    delete result.kickoff;
-    delete result.eta;
-    delete result.numFeatures;
+    debug('Local run step: %d', runStep);
 
-    // begin processing
-    result.lGrad = regression.gradient(
-      remoteData.currW,
-      result.biasedX,
-      result.y,
-      remoteData.lambda
-    );
-    result.lObj = regression.objective(
-      remoteData.currW,
-      result.biasedX,
-      result.y,
-      remoteData.lambda
-    );
-    /* eslint-disable no-console */
-    console.log(`gradient: ${result.lGrad}, objective: ${result.lObj}`);
-    /* eslint-enable no-console */
-    return result;
+    if (runStep === 1) {
+      return getInitialStatistics(options);
+    } else if (runStep === 2) {
+      return getFinalStatistics(options);
+    }
+
+    return iterate(options);
   },
 };
+
