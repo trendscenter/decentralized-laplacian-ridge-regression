@@ -5,6 +5,7 @@ const get = require('lodash/get');
 const n = require('numeric');
 const { DEFAULT_MAX_ITERATIONS, RUN_STEP_KEY } = require('./constants');
 const regression = require('./regression');
+const util = require('util');
 
 const DEFAULT_OBJECTIVE = 1e15;
 const GRADIENT_TOLERANCE = 1e-3;
@@ -235,7 +236,7 @@ function getFinalStatistics({
     original: totals.original,
   };
 
-  debug('remote.getFinalStatistics: %O', response);
+  debug('remote.getFinalStatistics: %x', util.inspect(response, { depth: null }));
 
   return response;
 }
