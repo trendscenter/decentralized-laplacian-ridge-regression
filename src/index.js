@@ -69,7 +69,7 @@ module.exports = {
           const rSquared = regression.rSquared(biasedX, y, betaVector);
           const tValue = regression.tValue(biasedX, y, betaVector);
           /* eslint-disable new-cap */
-          const tdist = distributions.Studentt(localCount - 1);
+          const tdist = distributions.Studentt(localCount - betaVector.length);
           /* eslint-enable new-cap */
           const tcdf = tValue.map(r => tdist.cdf(r));
           const pValue = n.mul(2, n.sub(1, tcdf));
@@ -107,7 +107,7 @@ module.exports = {
           const rSquaredLocal = regression.rSquared(biasedX, y, currW);
           const tValueLocal = regression.tValue(biasedX, y, currW);
           /* eslint-disable new-cap */
-          const tdist = distributions.Studentt(localCount - 1);
+          const tdist = distributions.Studentt(localCount - betaVector.length);
           /* eslint-enable new-cap */
           const tcdf = tValueLocal.map(r => tdist.cdf(r));
           const pValueLocal = n.mul(2, n.sub(1, tcdf));
@@ -240,7 +240,7 @@ module.exports = {
 
         // add t to p value transformation //
         /* eslint-disable new-cap */
-        const tdist = distributions.Studentt(globalYCount - 1);
+        const tdist = distributions.Studentt(globalYCount - currW.length);
         /* eslint-enable new-cap */
         const tcdf = tValueGlobal.map(r => tdist.cdf(r));
         const pValueGlobal = n.mul(2, (n.sub(1, tcdf))); // two tail pValue
@@ -250,7 +250,7 @@ module.exports = {
         console.log('The global t Values for currW :', tValueGlobal);
         console.log('The global p Values for currW :', pValueGlobal);
         /* eslint-enable no-console */
-
+        
         return {
           betaVectorLocal,
           currW,
