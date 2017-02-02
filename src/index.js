@@ -130,6 +130,7 @@ module.exports = {
           /* eslint-enable no-console */
 
           return {
+            betaVector,
             sseLocal,
             sstLocal,
             varXLocal,
