@@ -1,6 +1,6 @@
 {
   "name": "laplacian-noise-ridge-regression",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "Iterative ridge regression algorithm for COINSTAC.",
   "main": "src/index.js",
   "scripts": {
@@ -52,7 +52,7 @@
     "tape": "^4.5.1"
   },
   "dependencies": {
-    "distributions":"^1.0.0",
+    "distributions": "^1.0.0",
     "freesurfer-parser": "^0.0.2",
     "jstat": "^1.5.2",
     "lodash": "^4.11.1",
