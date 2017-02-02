@@ -93,7 +93,7 @@ module.exports = {
         ) {
           // step 1 receive the globalMeanY and currW, then calculate sseLocal,
           // sstLocal and varXLocal
-
+          const betaVector = opts.previousData.betaVector;
           const globalMeanY = opts.remoteResult.data.globalMeanY;
           const currW = opts.remoteResult.data.currW;
           const biasedX = opts.previousData.biasedX;
