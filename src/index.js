@@ -154,12 +154,6 @@ module.exports = {
   remote: {
     type: 'function',
     fn(opts) {
-      // Extract X and y variate name from userData
-      const xLabel = Object.keys(opts.userResults[0].userData.files[0].tags);
-      /* eslint-disable no-underscore-dangle */
-      const yLabel = opts.userResults[0].userData.__DECLARATION_INPUTS_KEY__[0][0];
-      /* eslint-enable no-underscore-dangle */
-
       if (
         opts.userResults[0].data.endOfIteration === true &&
         opts.userResults[0].data.statisticStep === 0
@@ -268,8 +262,6 @@ module.exports = {
           rSquaredGlobal,
           tValueGlobal,
           pValueGlobal,
-          xLabel,
-          yLabel,
           complete: true,
         };
       }
