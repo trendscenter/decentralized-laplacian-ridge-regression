@@ -86,9 +86,9 @@ module.exports = {
     if (
       r.currObjective > r.prevObjective ||
       n.norm2(r.Gradient) < GRADIENT_TOLERANCE ||
-      r.iteration === maxIterationCount
+      r.iteration >= maxIterationCount
     ) {
-    // indicate the iteration for searching converged W is ended
+      // indicate the iteration for searching converged W is ended
       r.endOfIteration = true;
       r.statisticStep = 0;
       return r;
