@@ -2,7 +2,7 @@
 
 const get = require('lodash/get');
 const n = require('numeric');
-const DEFAULT_MAX_ITERATIONS = require('./constants').DEFAULT_MAX_ITERATIONS;
+const { DEFAULT_LAMBDA, DEFAULT_MAX_ITERATIONS } = require('./constants.js');
 
 const DEFAULT_OBJECTIVE = 1e15;
 const GRADIENT_TOLERANCE = 1e-3;
@@ -52,6 +52,11 @@ module.exports = {
       'pluginState.inputs[0][1]',
       DEFAULT_MAX_ITERATIONS
     );
+    const lambda = get(
+      opts,
+      'pluginState.inputs[0][2]',
+      DEFAULT_LAMBDA
+    );
 
     this.assertUserDatas(opts);
 
@@ -62,7 +67,7 @@ module.exports = {
       r.prevObjective = DEFAULT_OBJECTIVE;
       r.Gradient = n.rep([firstUserResult.numFeatures], 0);
       r.eta = userResults[0].data.eta;
-      r.lambda = userResults[0].data.lambda;
+      r.lambda = lambda;
       r.Eg2 = n.rep([firstUserResult.numFeatures], 0);
       r.EdW = n.rep([firstUserResult.numFeatures], 0);
       r.rho = 0.5; // watch out for this and the eps

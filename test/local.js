@@ -95,17 +95,24 @@ tape('preprocess errors', (t) => {
     /WAT/,
     'throws with invalid Freesurfer region'
   );
+  t.throws(
+    local.preprocess.bind(null, getPreprocessOpts({
+      inputs: [[['TotalGrayVol']]],
+    })),
+    /lambda/i,
+    'throws without lambda'
+  );
   t.end();
 });
 
 tape('preprocess', (t) => {
-  const lambda = 123;
+  const lambda = 0.995;
   const eta = 456;
 
   t.plan(7);
 
   local.preprocess(getPreprocessOpts({
-    inputs: [[['TotalGrayVol', 'Left-Hippocampus']]],
+    inputs: [[['TotalGrayVol', 'Left-Hippocampus'], undefined, lambda]],
   }))
     .then((result) => {
       t.ok(
@@ -130,7 +137,7 @@ tape('preprocess', (t) => {
       t.equal(result.numFeatures, 3, 'sets number of features');
 
       return local.preprocess(getPreprocessOpts({
-        inputs: [[['TotalGrayVol', 'Left-Hippocampus']]],
+        inputs: [[['TotalGrayVol', 'Left-Hippocampus'], undefined, lambda]],
         userData: {
           eta,
           lambda,
