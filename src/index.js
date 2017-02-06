@@ -35,6 +35,13 @@ module.exports = {
         label: 'Iteration count',
         type: 'number',
       }, {
+        defaultValue: 1,
+        label: 'Lambda',
+        max: 1,
+        min: 0,
+        step: 0.05,
+        type: 'number',
+      }, {
         defaultValue: [{
           name: 'Is Control?',
           type: 'boolean',
