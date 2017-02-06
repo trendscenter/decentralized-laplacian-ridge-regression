@@ -7,7 +7,7 @@ const remoteRunner = require('./remote');
 const regression = require('./regression');
 const n = require('numeric');
 const distributions = require('distributions');
-const DEFAULT_MAX_ITERATIONS = require('./constants').DEFAULT_MAX_ITERATIONS;
+const { DEFAULT_LAMBDA, DEFAULT_MAX_ITERATIONS } = require('./constants.js');
 
 module.exports = {
   name: pkg.name,
@@ -35,7 +35,7 @@ module.exports = {
         label: 'Iteration count',
         type: 'number',
       }, {
-        defaultValue: 1,
+        defaultValue: DEFAULT_LAMBDA,
         label: 'Lambda',
         max: 1,
         min: 0,
