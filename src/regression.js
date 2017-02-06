@@ -1,9 +1,8 @@
 'use strict';
+
 const n = require('numeric');
 
 module.exports = {
-  defaultLambda: 0.0,
-
   /**
    * Compute regression error for a set of samples (objective).
    *
@@ -28,9 +27,8 @@ module.exports = {
    * @return {number} error score
    */
   objective(w, xVals, yVals, lambda) {
-    const localLambda = lambda || this.defaultLambda;
     return n.sum(n.pow(n.sub(yVals, n.dot(xVals, w)), 2)) +
-      (localLambda * n.dot(w, w) * 0.5);
+      (lambda * n.dot(w, w) * 0.5);
   },
 
   /**
@@ -46,13 +44,12 @@ module.exports = {
    * @return {array}  gradient values for each mVal
    */
   gradient(w, X, y, lambda) {
-    const localLambda = lambda || this.defaultLambda;
     return n.add(
       n.mul(
         -2,
         n.dot(n.transpose(X), n.sub(y, n.dot(X, w)))
       ),
-      n.mul(localLambda, w)
+      n.mul(lambda, w)
     );
   },
 
