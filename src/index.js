@@ -219,22 +219,24 @@ module.exports = {
         const varError = (1 / (globalYCount - currW.length)) * sseGlobal;
         const seBetaGlobal = [];
         const tValueGlobal = [];
-        
+
         // calculate tValueGlobal
-        var varXGlobalMatrix=n.rep([currW.length,currW.length],0);
+        let varXGlobalMatrix = n.rep([currW.length, currW.length], 0);
 
-        for (let i=0; i < userResults.length; i += 1) {
+        for (let i = 0; i < userResults.length; i += 1) {
           varXGlobalMatrix = n.add(varXGlobalMatrix, userResults[i].data.varXLocalMatrix);
-        };
+        }
 
-        console.log('varXGlobalMatrix is',varXGlobalMatrix);
+        /* eslint-disable no-console */
+        console.log('varXGlobalMatrix is', varXGlobalMatrix);
+        /* eslint-enable no-console */
 
-        const varBetaGlobal = n.mul(n.inv(varXGlobalMatrix),varError);
+        const varBetaGlobal = n.mul(n.inv(varXGlobalMatrix), varError);
 
-        for (let i=0; i < currW.length; i +=1) {
-             seBetaGlobal[i] = Math.sqrt(varBetaGlobal[i][i]);
-             tValueGlobal[i] = currW[i] / seBetaGlobal[i];
-         }
+        for (let i = 0; i < currW.length; i += 1) {
+          seBetaGlobal[i] = Math.sqrt(varBetaGlobal[i][i]);
+          tValueGlobal[i] = currW[i] / seBetaGlobal[i];
+        }
 
         // calculate r squared global
         const rSquaredGlobal = 1 - (sseGlobal / sstGlobal);
@@ -251,7 +253,7 @@ module.exports = {
         console.log('The global t Values for currW :', tValueGlobal);
         console.log('The global p Values for currW :', pValueGlobal);
         /* eslint-enable no-console */
-        
+
         return {
           betaVectorLocal,
           currW,
