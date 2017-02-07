@@ -50,8 +50,7 @@ module.exports = {
       type: 'function',
       fn(opts) {
       // if W doesn't merge, return run(), if W merge, return statistic()
-//        console.log('opts.remoteResult.data is',opts.remoteResult.data);
-//         console.log('opts.previousData is', opts.previousData);
+
         /* eslint-disable no-console */
         console.log('opts.remoteResult.data.endOfIteration is', opts.remoteResult.data.endOfIteration);
         console.log('opts.remoteResult.data.statisticStep is', opts.remoteResult.data.statisticStep);
@@ -69,7 +68,7 @@ module.exports = {
           const rSquared = regression.rSquared(biasedX, y, betaVector);
           const tValue = regression.tValue(biasedX, y, betaVector);
           /* eslint-disable new-cap */
-          const tdist = distributions.Studentt(localCount - 1);
+          const tdist = distributions.Studentt(localCount - betaVector.length);
           /* eslint-enable new-cap */
           const tcdf = tValue.map(r => tdist.cdf(r));
           const pValue = n.mul(2, n.sub(1, tcdf));
@@ -93,7 +92,7 @@ module.exports = {
         ) {
           // step 1 receive the globalMeanY and currW, then calculate sseLocal,
           // sstLocal and varXLocal
-
+          const betaVector = opts.previousData.betaVector;
           const globalMeanY = opts.remoteResult.data.globalMeanY;
           const currW = opts.remoteResult.data.currW;
           const biasedX = opts.previousData.biasedX;
@@ -107,7 +106,7 @@ module.exports = {
           const rSquaredLocal = regression.rSquared(biasedX, y, currW);
           const tValueLocal = regression.tValue(biasedX, y, currW);
           /* eslint-disable new-cap */
-          const tdist = distributions.Studentt(localCount - 1);
+          const tdist = distributions.Studentt(localCount - betaVector.length);
           /* eslint-enable new-cap */
           const tcdf = tValueLocal.map(r => tdist.cdf(r));
           const pValueLocal = n.mul(2, n.sub(1, tcdf));
@@ -116,12 +115,8 @@ module.exports = {
           const sseLocal = n.sum(n.pow(n.sub(y, n.dot(biasedX, currW)), 2));
           const sstLocal = n.sum(n.pow(n.sub(y, n.rep(n.dim(y), globalMeanY)), 2));
 
-          // calculate varXLocal
+          // calculate varXLocalMatrix
           const varXLocalMatrix = n.dot(n.transpose(biasedX), biasedX);
-          const varXLocal = [];
-          for (let i = 0; i < currW.length; i += 1) {
-            varXLocal.push(varXLocalMatrix[i][i]);
-          }
 
           /* eslint-disable no-console */
           console.log('local r squared for currW', rSquaredLocal);
@@ -130,9 +125,10 @@ module.exports = {
           /* eslint-enable no-console */
 
           return {
+            betaVector,
             sseLocal,
             sstLocal,
-            varXLocal,
+            varXLocalMatrix,
             currW,
             localCount,
             rSquared,
@@ -219,18 +215,26 @@ module.exports = {
         const globalYCount = userResults.reduce(
           (sum, userResult) => sum + userResult.data.localCount, 0
         );
-        const betaCount = currW.length;
-        const varError = (1 / (globalYCount - 2)) * sseGlobal;
-        const varXGlobal = [];
+
+        const varError = (1 / (globalYCount - currW.length)) * sseGlobal;
         const seBetaGlobal = [];
         const tValueGlobal = [];
 
         // calculate tValueGlobal
-        for (let i = 0; i < betaCount; i += 1) {
-          varXGlobal[i] = userResults.reduce(
-            (sum, userResult) => sum + userResult.data.varXLocal[i], 0
-          );
-          seBetaGlobal[i] = Math.sqrt(varError / varXGlobal[i]);
+        let varXGlobalMatrix = n.rep([currW.length, currW.length], 0);
+
+        for (let i = 0; i < userResults.length; i += 1) {
+          varXGlobalMatrix = n.add(varXGlobalMatrix, userResults[i].data.varXLocalMatrix);
+        }
+
+        /* eslint-disable no-console */
+        console.log('varXGlobalMatrix is', varXGlobalMatrix);
+        /* eslint-enable no-console */
+
+        const varBetaGlobal = n.mul(n.inv(varXGlobalMatrix), varError);
+
+        for (let i = 0; i < currW.length; i += 1) {
+          seBetaGlobal[i] = Math.sqrt(varBetaGlobal[i][i]);
           tValueGlobal[i] = currW[i] / seBetaGlobal[i];
         }
 
@@ -239,7 +243,7 @@ module.exports = {
 
         // add t to p value transformation //
         /* eslint-disable new-cap */
-        const tdist = distributions.Studentt(globalYCount - 1);
+        const tdist = distributions.Studentt(globalYCount - currW.length);
         /* eslint-enable new-cap */
         const tcdf = tValueGlobal.map(r => tdist.cdf(r));
         const pValueGlobal = n.mul(2, (n.sub(1, tcdf))); // two tail pValue
