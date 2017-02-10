@@ -8,6 +8,7 @@ const regression = require('./regression');
 const n = require('numeric');
 const distributions = require('distributions');
 const { DEFAULT_LAMBDA, DEFAULT_MAX_ITERATIONS } = require('./constants.js');
+const get = require('lodash/get');
 
 module.exports = {
   name: pkg.name,
@@ -67,11 +68,13 @@ module.exports = {
           (opts.remoteResult.data.endOfIteration === true) &&
           (opts.remoteResult.data.statisticStep === 0)
         ) {
+          const lambda = get(opts, 'remoteResult.data.lambda');
+
           // step 0 calculate local statistics and localYMean
           const biasedX = opts.previousData.biasedX;
           const y = opts.previousData.y;
           const localCount = y.length;
-          const betaVector = regression.oneShot(biasedX, y);
+          const betaVector = regression.oneShot(biasedX, y, lambda);
           const rSquared = regression.rSquared(biasedX, y, betaVector);
           const tValue = regression.tValue(biasedX, y, betaVector);
           /* eslint-disable new-cap */

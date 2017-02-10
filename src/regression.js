@@ -56,21 +56,21 @@ module.exports = {
   /**
    * minimize a set of regressors against the objective function and
    * response set
-   * @param  {array} initialMVals initial regressor values
    * @param  {array} xVals    2D array where each sub-array contains all xVals
    *                          for a single sample in the same order as
    *                          initialMVals
    * @param  {array}  yVals   array of y values for each sample in xVals
+   * @param {number} lambda
    * @return {array}  w in same order as initialMVals
    */
-  oneShot(xVals, yVals, initialMVals) {
-    const localInitialMVals = initialMVals || n.random(n.dim(xVals[0]));
+  oneShot(xVals, yVals, lambda) {
+    const initialMVals = n.random(n.dim(xVals[0]));
     /* eslint-disable no-console */
     console.log('xVals are:', xVals);
     console.log('yVals are:', yVals);
-    console.log('localInitialMVals are:', localInitialMVals);
+    console.log('localInitialMVals are:', initialMVals);
     /* eslint-enable no-console */
-    return n.uncmin(w => this.objective(w, xVals, yVals), localInitialMVals, 0.001).solution;
+    return n.uncmin(w => this.objective(w, xVals, yVals, lambda), initialMVals, 0.001).solution;
   },
 
   /**
