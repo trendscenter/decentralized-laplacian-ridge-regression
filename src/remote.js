@@ -76,6 +76,14 @@ module.exports = {
       r.iteration = 1;
       return r;
     }
+
+    /**
+     * @todo `opts.pluginState` isn't set on the first iteration. Re-set every
+     * time to ensure initial value, which defaults to `DEFAULT_LAMBDA`, is
+     * reset if needed.
+     */
+    r.lambda = lambda;
+
     r.iteration += 1;
 
     r.currObjective = userResults.reduce((prev, rslt) => prev + rslt.data.lObj, 0);
