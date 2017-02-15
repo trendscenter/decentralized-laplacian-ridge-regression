@@ -20,7 +20,7 @@ function addBias(arr) {
     throw new Error(`Expected every item of ${arr} to be an array`);
   }
 
-  return arr.map(row => row.concat(1));
+  return arr.map(row => [1].concat(row));
 }
 
 /**
