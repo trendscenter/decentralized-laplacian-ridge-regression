@@ -70,6 +70,7 @@ module.exports = {
    */
   preprocess(opts) {
     let features = get(opts, 'remoteResult.pluginState.inputs[0][0]');
+    let lambda = get(opts, 'remoteResult.pluginState.inputs[0][2]');
 
     /**
      * Retrieve plugin from user data.
@@ -79,6 +80,7 @@ module.exports = {
      */
     if (!features && DECLARATION_INPUTS_KEY in opts.userData) {
       features = opts.userData[DECLARATION_INPUTS_KEY][0][0];
+      lambda = opts.userData[DECLARATION_INPUTS_KEY][0][2];
     }
 
     if (!features || !Array.isArray(features) || !features.length) {
@@ -87,6 +89,8 @@ module.exports = {
       features.some(f => FreeSurfer.validFields.indexOf(f) < 0)
     ) {
       throw new Error(`Unknown FreeSurfer region in inputs: ${features.toString()}`);
+    } else if (typeof lambda !== 'number') {
+      throw new Error('Lambda required');
     }
 
     const readFileAsync = pify(fs.readFile);
@@ -128,7 +132,7 @@ module.exports = {
     const result = {
       biasedX,
       eta: userData.eta || 1e-1,
-      lambda: userData.lambda || 0.0,
+      lambda,
       numFeatures: biasedX[0].length,
     };
 

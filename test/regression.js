@@ -1,5 +1,6 @@
 'use strict';
 
+const { DEFAULT_LAMBDA } = require('../src/constants.js');
 const regression = require('../src/regression');
 const tape = require('tape');
 
@@ -16,7 +17,7 @@ function isNumber(val) {
 }
 
 tape('gradient', (t) => {
-  const grad = regression.gradient(w, xVals, yVals);
+  const grad = regression.gradient(w, xVals, yVals, DEFAULT_LAMBDA);
 
   t.ok(Array.isArray(grad), 'is an array');
   t.ok(grad.every(isNumber), 'contains only numbers');
@@ -24,7 +25,7 @@ tape('gradient', (t) => {
 });
 
 tape('objective', (t) => {
-  const obj = regression.objective(w, xVals, yVals);
+  const obj = regression.objective(w, xVals, yVals, DEFAULT_LAMBDA);
 
   t.ok(isNumber(obj), 'is number');
   t.end();

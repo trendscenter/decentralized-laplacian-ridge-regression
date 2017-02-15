@@ -1,9 +1,8 @@
 'use strict';
+
 const n = require('numeric');
 
 module.exports = {
-  defaultLambda: 0.0,
-
   /**
    * Compute regression error for a set of samples (objective).
    *
@@ -28,9 +27,8 @@ module.exports = {
    * @return {number} error score
    */
   objective(w, xVals, yVals, lambda) {
-    const localLambda = lambda || this.defaultLambda;
     return n.sum(n.pow(n.sub(yVals, n.dot(xVals, w)), 2)) +
-      (localLambda * n.dot(w, w) * 0.5);
+      (lambda * n.dot(w, w) * 0.5);
   },
 
   /**
@@ -46,34 +44,33 @@ module.exports = {
    * @return {array}  gradient values for each mVal
    */
   gradient(w, X, y, lambda) {
-    const localLambda = lambda || this.defaultLambda;
     return n.add(
       n.mul(
         -2,
         n.dot(n.transpose(X), n.sub(y, n.dot(X, w)))
       ),
-      n.mul(localLambda, w)
+      n.mul(lambda, w)
     );
   },
 
   /**
    * minimize a set of regressors against the objective function and
    * response set
-   * @param  {array} initialMVals initial regressor values
    * @param  {array} xVals    2D array where each sub-array contains all xVals
    *                          for a single sample in the same order as
    *                          initialMVals
    * @param  {array}  yVals   array of y values for each sample in xVals
+   * @param {number} lambda
    * @return {array}  w in same order as initialMVals
    */
-  oneShot(xVals, yVals, initialMVals) {
-    const localInitialMVals = initialMVals || n.random(n.dim(xVals[0]));
+  oneShot(xVals, yVals, lambda) {
+    const initialMVals = n.random(n.dim(xVals[0]));
     /* eslint-disable no-console */
     console.log('xVals are:', xVals);
     console.log('yVals are:', yVals);
-    console.log('localInitialMVals are:', localInitialMVals);
+    console.log('localInitialMVals are:', initialMVals);
     /* eslint-enable no-console */
-    return n.uncmin(w => this.objective(w, xVals, yVals), localInitialMVals, 0.001).solution;
+    return n.uncmin(w => this.objective(w, xVals, yVals, lambda), initialMVals, 0.001).solution;
   },
 
   /**
