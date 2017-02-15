@@ -264,20 +264,34 @@ module.exports = {
         console.log('The global p Values for currW :', pValueGlobal);
         /* eslint-enable no-console */
 
-        return {
-          betaVectorLocal,
-          currW,
-          rSquaredLocalOriginal,
-          tValueLocalOriginal,
-          pValueLocalOriginal,
-          rSquaredLocal,
-          tValueLocal,
-          pValueLocal,
-          rSquaredGlobal,
-          tValueGlobal,
-          pValueGlobal,
+        const result = {
           complete: true,
+          global: {
+            betaVector: currW,
+            pValue: pValueGlobal,
+            rSquared: rSquaredGlobal,
+            tValue: tValueGlobal,
+          },
         };
+
+        /**
+         * Iterate over users' statistics and append to results document.
+         *
+         * @todo Improve performance by removing redundant iteration.
+         */
+        betaVectorLocal.forEach((betaVector, i) => {
+          result[i] = {
+            betaVector,
+            pValue: pValueLocal[i],
+            pValueOriginal: pValueLocalOriginal[i],
+            rSquared: rSquaredLocal[i],
+            rSquaredOriginal: rSquaredLocalOriginal[i],
+            tValue: tValueLocal[i],
+            tValueOriginal: tValueLocalOriginal[i],
+          };
+        });
+
+        return result;
       }
 
       return remoteRunner.run(opts);
