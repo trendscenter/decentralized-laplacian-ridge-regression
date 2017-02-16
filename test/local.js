@@ -51,7 +51,7 @@ tape('addBias', (t) => {
     'throws with non-array item'
   );
   const r = local.addBias([[1, 2, 3], [4, 5, 6]]);
-  t.deepEquals(r, [[1, 2, 3, 1], [4, 5, 6, 1]], 'bias adds');
+  t.deepEquals(r, [[1, 1, 2, 3], [1, 4, 5, 6]], 'bias adds');
   t.end();
 });
 
@@ -126,7 +126,7 @@ tape('preprocess', (t) => {
 
       t.deepEqual(
         result.biasedX,
-        [[28, 1, 1], [29, -1, 1], [31, 1, 1]],
+        [[1, 28, 1], [1, 29, -1], [1, 31, 1]],
         'transforms files\' tags to co-variates in `biasedX`'
       );
       t.deepEqual(
