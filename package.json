@@ -53,6 +53,7 @@
     "tape": "^4.5.1"
   },
   "dependencies": {
+    "alphanum-sort": "^1.0.2",
     "distributions": "^1.0.0",
     "freesurfer-parser": "^0.0.2",
     "jstat": "^1.5.2",
