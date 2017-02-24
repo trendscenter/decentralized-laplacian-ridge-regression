@@ -1,5 +1,6 @@
 'use strict';
 
+const alphanumSort = require('alphanum-sort');
 const FreeSurfer = require('freesurfer-parser');
 const pkg = require('../package.json');
 const localRunner = require('./local');
@@ -30,7 +31,10 @@ module.exports = {
         help: 'Select Freesurfer region(s) of interest',
         label: 'Freesurfer ROI',
         type: 'select',
-        values: FreeSurfer.validFields,
+        values: alphanumSort(
+          FreeSurfer.validFields.filter(field => field !== 'header'),
+          { insensitive: true }
+        ),
       }, {
         defaultValue: DEFAULT_MAX_ITERATIONS,
         label: 'Iteration count',
