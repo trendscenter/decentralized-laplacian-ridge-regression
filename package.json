@@ -39,7 +39,7 @@
     "test"
   ],
   "devDependencies": {
-    "coinstac-simulator": "^2.0.8",
+    "coinstac-simulator": "^2.4.0",
     "cross-env": "^3.1.4",
     "eslint": "^3.5.0",
     "eslint-config-airbnb": "^11.1.0",
