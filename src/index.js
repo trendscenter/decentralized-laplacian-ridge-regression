@@ -28,6 +28,7 @@ module.exports = {
       },
       verbose: true,
       inputs: [{
+        defaultValue: ['Right-Cerebellum-Cortex'],
         help: 'Select Freesurfer region(s) of interest',
         label: 'Freesurfer ROI',
         type: 'select',
