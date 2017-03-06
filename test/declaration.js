@@ -22,6 +22,9 @@ module.exports = {
     [{
       name: 'Is Control',
       type: 'boolean',
+    }, {
+      name: 'Age',
+      type: 'number',
     }],
   ]],
   computationPath: '../src/index.js',
@@ -29,11 +32,13 @@ module.exports = {
     metaFilePath: path.join(__dirname, 'demo/metadata-1.csv'),
     metaCovariateMapping: {
       1: 0,
+      2: 1,
     },
   }, {
     metaFilePath: path.join(__dirname, 'demo/metadata-2.csv'),
     metaCovariateMapping: {
       1: 0,
+      2: 1,
     },
   }],
   verbose: true,
