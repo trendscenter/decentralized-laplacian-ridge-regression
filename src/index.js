@@ -273,6 +273,7 @@ module.exports = {
           complete: true,
           global: {
             betaVector: currW,
+            degreesOfFreedom: globalYCount - currW.length,
             pValue: pValueGlobal,
             rSquared: rSquaredGlobal,
             tValue: tValueGlobal,
@@ -287,6 +288,8 @@ module.exports = {
         betaVectorLocal.forEach((betaVector, i) => {
           result[i] = {
             betaVector,
+            degreesOfFreedom:
+              userResults[i].data.localCount - betaVector.length,
             pValue: pValueLocal[i],
             pValueOriginal: pValueLocalOriginal[i],
             rSquared: rSquaredLocal[i],

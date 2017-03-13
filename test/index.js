@@ -2,3 +2,4 @@
 
 require('./local');
 require('./regression');
+require('./computation.js');
