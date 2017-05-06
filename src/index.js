@@ -264,6 +264,7 @@ module.exports = {
         const pValueGlobal = n.mul(2, (n.sub(1, tcdf))); // two tail pValue
 
         /* eslint-disable no-console */
+        console.log('The global currW is :', currW);
         console.log('The global r squared for currW :', rSquaredGlobal);
         console.log('The global t Values for currW :', tValueGlobal);
         console.log('The global p Values for currW :', pValueGlobal);
