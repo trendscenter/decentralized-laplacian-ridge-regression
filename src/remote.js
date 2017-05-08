@@ -9,6 +9,8 @@ const GRADIENT_TOLERANCE = 1e-3;
 
 module.exports = {
   defaultW: null, // may be overwritten for unit testing
+//  defaultW: [48604, -209, 553],
+
 
   assertUserDatas(opts) {
     opts.userResults.forEach((usrRslt, ndx, arr) => {
@@ -62,16 +64,28 @@ module.exports = {
 
     // initialize group data
     if (r.iteration === 0) {
+      // get averaged betaVector across sites for W initialization
+      const averageBetaVector = [];
+      const betaCount = userResults[0].data.betaVector.length;
+      const userCount = userResults.length;
+
+      for (let i = 0; i < betaCount; i += 1) {
+        averageBetaVector.push(userResults.reduce(
+          (sum, userResult) => sum + userResult.data.betaVector[i], 0
+        ) / userCount);
+      }
+
       const firstUserResult = userResults[0].data;
-      r.currW = r.prevW = this.defaultW || n.random([firstUserResult.numFeatures]);
+  //    r.currW = r.prevW = this.defaultW || n.random([firstUserResult.numFeatures]);
+      r.currW = r.prevW = this.defaultW || averageBetaVector;
       r.prevObjective = DEFAULT_OBJECTIVE;
       r.Gradient = n.rep([firstUserResult.numFeatures], 0);
       r.eta = userResults[0].data.eta;
       r.lambda = lambda;
       r.Eg2 = n.rep([firstUserResult.numFeatures], 0);
       r.EdW = n.rep([firstUserResult.numFeatures], 0);
-      r.rho = 0.5; // watch out for this and the eps
-      r.eps = 0.1;
+      r.rho = 0.8; // watch out for this and the eps
+      r.eps = 0.01;
       r.deltaW = 0;
       r.iteration = 1;
       return r;

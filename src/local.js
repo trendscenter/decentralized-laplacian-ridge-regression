@@ -154,10 +154,11 @@ module.exports = {
           const freeSurfer = new FreeSurfer({
             string: data.toString(),
           });
-
-          // filter based on first passed in ROI
           return freeSurfer[features[0]];
         });
+          // return local regression result for W initialization
+        result.betaVector = regression.oneShot(biasedX, result.y, lambda);
+          // filter based on first passed in ROI
 
         return result;
       });
