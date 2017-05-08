@@ -10,7 +10,7 @@ const GRADIENT_TOLERANCE = 1e-3;
 module.exports = {
   defaultW: null, // may be overwritten for unit testing
 //  defaultW: [48604, -209, 553],
-  
+
 
   assertUserDatas(opts) {
     opts.userResults.forEach((usrRslt, ndx, arr) => {
@@ -77,7 +77,7 @@ module.exports = {
 
       const firstUserResult = userResults[0].data;
   //    r.currW = r.prevW = this.defaultW || n.random([firstUserResult.numFeatures]);
-      r.currW = r.prevW = this.defaultW || averageBetaVector
+      r.currW = r.prevW = this.defaultW || averageBetaVector;
       r.prevObjective = DEFAULT_OBJECTIVE;
       r.Gradient = n.rep([firstUserResult.numFeatures], 0);
       r.eta = userResults[0].data.eta;

@@ -157,7 +157,7 @@ module.exports = {
           return freeSurfer[features[0]];
         });
           // return local regression result for W initialization
-        result.betaVector = regression.oneShot(biasedX, result.y, lambda)
+        result.betaVector = regression.oneShot(biasedX, result.y, lambda);
           // filter based on first passed in ROI
 
         return result;
